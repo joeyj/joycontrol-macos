@@ -24,3 +24,4 @@ sudo launchctl stop com.apple.bluetoothd && launchctl start com.apple.bluetoothd
 Feb 09 15:30:38.153  Note             0x0000                     Attempt to close L2CAP Channel 0x0042 for connection handle 0x0020 from process "Unknown (0) (IOBluetoothDeviceUserClient::closeConnectionWL())"
 ```
 * Extract joycontrol-specific logic into a Swift package
+* Only Pro Controller is emulated at the moment
