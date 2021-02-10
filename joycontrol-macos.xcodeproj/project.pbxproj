@@ -1,0 +1,641 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 52;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		F738726225D3A2C200279B82 /* joycontrol_macosApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F738726125D3A2C200279B82 /* joycontrol_macosApp.swift */; };
+		F738726625D3A2C300279B82 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F738726525D3A2C300279B82 /* Assets.xcassets */; };
+		F738726925D3A2C300279B82 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F738726825D3A2C300279B82 /* Preview Assets.xcassets */; };
+		F738727525D3A2C300279B82 /* joycontrol_macosTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F738727425D3A2C300279B82 /* joycontrol_macosTests.swift */; };
+		F738728025D3A2C300279B82 /* joycontrol_macosUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F738727F25D3A2C300279B82 /* joycontrol_macosUITests.swift */; };
+		F73872C525D3A3CB00279B82 /* HCIWriteExtendedInquiryResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = F73872BC25D3A3CB00279B82 /* HCIWriteExtendedInquiryResponse.swift */; };
+		F73872C625D3A3CB00279B82 /* Common.swift in Sources */ = {isa = PBXBuildFile; fileRef = F73872BD25D3A3CB00279B82 /* Common.swift */; };
+		F73872C725D3A3CB00279B82 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F73872BE25D3A3CB00279B82 /* ContentView.swift */; };
+		F73872C825D3A3CB00279B82 /* InputReport.swift in Sources */ = {isa = PBXBuildFile; fileRef = F73872BF25D3A3CB00279B82 /* InputReport.swift */; };
+		F73872C925D3A3CB00279B82 /* ControllerState.swift in Sources */ = {isa = PBXBuildFile; fileRef = F73872C025D3A3CB00279B82 /* ControllerState.swift */; };
+		F73872CA25D3A3CB00279B82 /* OutputReport.swift in Sources */ = {isa = PBXBuildFile; fileRef = F73872C125D3A3CB00279B82 /* OutputReport.swift */; };
+		F73872CB25D3A3CB00279B82 /* FlashMemory.swift in Sources */ = {isa = PBXBuildFile; fileRef = F73872C225D3A3CB00279B82 /* FlashMemory.swift */; };
+		F73872CC25D3A3CB00279B82 /* NintendoSwitchControllerSDP.plist in Resources */ = {isa = PBXBuildFile; fileRef = F73872C325D3A3CB00279B82 /* NintendoSwitchControllerSDP.plist */; };
+		F73872CD25D3A3CB00279B82 /* Protocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = F73872C425D3A3CB00279B82 /* Protocol.swift */; };
+		F73872D325D3A40400279B82 /* BluetoothDarwin in Frameworks */ = {isa = PBXBuildFile; productRef = F73872D225D3A40400279B82 /* BluetoothDarwin */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		F738727125D3A2C300279B82 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F738725625D3A2C200279B82 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = F738725D25D3A2C200279B82;
+			remoteInfo = "joycontrol-macos";
+		};
+		F738727C25D3A2C300279B82 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F738725625D3A2C200279B82 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = F738725D25D3A2C200279B82;
+			remoteInfo = "joycontrol-macos";
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		F738725E25D3A2C200279B82 /* joycontrol-macos.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "joycontrol-macos.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		F738726125D3A2C200279B82 /* joycontrol_macosApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = joycontrol_macosApp.swift; sourceTree = "<group>"; };
+		F738726525D3A2C300279B82 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		F738726825D3A2C300279B82 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		F738726A25D3A2C300279B82 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		F738726B25D3A2C300279B82 /* joycontrol_macos.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = joycontrol_macos.entitlements; sourceTree = "<group>"; };
+		F738727025D3A2C300279B82 /* joycontrol-macosTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "joycontrol-macosTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		F738727425D3A2C300279B82 /* joycontrol_macosTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = joycontrol_macosTests.swift; sourceTree = "<group>"; };
+		F738727625D3A2C300279B82 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		F738727B25D3A2C300279B82 /* joycontrol-macosUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "joycontrol-macosUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		F738727F25D3A2C300279B82 /* joycontrol_macosUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = joycontrol_macosUITests.swift; sourceTree = "<group>"; };
+		F738728125D3A2C300279B82 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		F73872BC25D3A3CB00279B82 /* HCIWriteExtendedInquiryResponse.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HCIWriteExtendedInquiryResponse.swift; sourceTree = "<group>"; };
+		F73872BD25D3A3CB00279B82 /* Common.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Common.swift; sourceTree = "<group>"; };
+		F73872BE25D3A3CB00279B82 /* ContentView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		F73872BF25D3A3CB00279B82 /* InputReport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InputReport.swift; sourceTree = "<group>"; };
+		F73872C025D3A3CB00279B82 /* ControllerState.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ControllerState.swift; sourceTree = "<group>"; };
+		F73872C125D3A3CB00279B82 /* OutputReport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OutputReport.swift; sourceTree = "<group>"; };
+		F73872C225D3A3CB00279B82 /* FlashMemory.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FlashMemory.swift; sourceTree = "<group>"; };
+		F73872C325D3A3CB00279B82 /* NintendoSwitchControllerSDP.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = NintendoSwitchControllerSDP.plist; sourceTree = "<group>"; };
+		F73872C425D3A3CB00279B82 /* Protocol.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Protocol.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		F738725B25D3A2C200279B82 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F73872D325D3A40400279B82 /* BluetoothDarwin in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F738726D25D3A2C300279B82 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F738727825D3A2C300279B82 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		F738725525D3A2C200279B82 = {
+			isa = PBXGroup;
+			children = (
+				F738726025D3A2C200279B82 /* joycontrol-macos */,
+				F738727325D3A2C300279B82 /* joycontrol-macosTests */,
+				F738727E25D3A2C300279B82 /* joycontrol-macosUITests */,
+				F738725F25D3A2C200279B82 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		F738725F25D3A2C200279B82 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				F738725E25D3A2C200279B82 /* joycontrol-macos.app */,
+				F738727025D3A2C300279B82 /* joycontrol-macosTests.xctest */,
+				F738727B25D3A2C300279B82 /* joycontrol-macosUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		F738726025D3A2C200279B82 /* joycontrol-macos */ = {
+			isa = PBXGroup;
+			children = (
+				F73872BD25D3A3CB00279B82 /* Common.swift */,
+				F73872BE25D3A3CB00279B82 /* ContentView.swift */,
+				F73872C025D3A3CB00279B82 /* ControllerState.swift */,
+				F73872C225D3A3CB00279B82 /* FlashMemory.swift */,
+				F73872BC25D3A3CB00279B82 /* HCIWriteExtendedInquiryResponse.swift */,
+				F73872BF25D3A3CB00279B82 /* InputReport.swift */,
+				F73872C325D3A3CB00279B82 /* NintendoSwitchControllerSDP.plist */,
+				F73872C125D3A3CB00279B82 /* OutputReport.swift */,
+				F73872C425D3A3CB00279B82 /* Protocol.swift */,
+				F738726125D3A2C200279B82 /* joycontrol_macosApp.swift */,
+				F738726525D3A2C300279B82 /* Assets.xcassets */,
+				F738726A25D3A2C300279B82 /* Info.plist */,
+				F738726B25D3A2C300279B82 /* joycontrol_macos.entitlements */,
+				F738726725D3A2C300279B82 /* Preview Content */,
+			);
+			path = "joycontrol-macos";
+			sourceTree = "<group>";
+		};
+		F738726725D3A2C300279B82 /* Preview Content */ = {
+			isa = PBXGroup;
+			children = (
+				F738726825D3A2C300279B82 /* Preview Assets.xcassets */,
+			);
+			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		F738727325D3A2C300279B82 /* joycontrol-macosTests */ = {
+			isa = PBXGroup;
+			children = (
+				F738727425D3A2C300279B82 /* joycontrol_macosTests.swift */,
+				F738727625D3A2C300279B82 /* Info.plist */,
+			);
+			path = "joycontrol-macosTests";
+			sourceTree = "<group>";
+		};
+		F738727E25D3A2C300279B82 /* joycontrol-macosUITests */ = {
+			isa = PBXGroup;
+			children = (
+				F738727F25D3A2C300279B82 /* joycontrol_macosUITests.swift */,
+				F738728125D3A2C300279B82 /* Info.plist */,
+			);
+			path = "joycontrol-macosUITests";
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		F738725D25D3A2C200279B82 /* joycontrol-macos */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F738728425D3A2C300279B82 /* Build configuration list for PBXNativeTarget "joycontrol-macos" */;
+			buildPhases = (
+				F738725A25D3A2C200279B82 /* Sources */,
+				F738725B25D3A2C200279B82 /* Frameworks */,
+				F738725C25D3A2C200279B82 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "joycontrol-macos";
+			packageProductDependencies = (
+				F73872D225D3A40400279B82 /* BluetoothDarwin */,
+			);
+			productName = "joycontrol-macos";
+			productReference = F738725E25D3A2C200279B82 /* joycontrol-macos.app */;
+			productType = "com.apple.product-type.application";
+		};
+		F738726F25D3A2C300279B82 /* joycontrol-macosTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F738728725D3A2C300279B82 /* Build configuration list for PBXNativeTarget "joycontrol-macosTests" */;
+			buildPhases = (
+				F738726C25D3A2C300279B82 /* Sources */,
+				F738726D25D3A2C300279B82 /* Frameworks */,
+				F738726E25D3A2C300279B82 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				F738727225D3A2C300279B82 /* PBXTargetDependency */,
+			);
+			name = "joycontrol-macosTests";
+			productName = "joycontrol-macosTests";
+			productReference = F738727025D3A2C300279B82 /* joycontrol-macosTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		F738727A25D3A2C300279B82 /* joycontrol-macosUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F738728A25D3A2C300279B82 /* Build configuration list for PBXNativeTarget "joycontrol-macosUITests" */;
+			buildPhases = (
+				F738727725D3A2C300279B82 /* Sources */,
+				F738727825D3A2C300279B82 /* Frameworks */,
+				F738727925D3A2C300279B82 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				F738727D25D3A2C300279B82 /* PBXTargetDependency */,
+			);
+			name = "joycontrol-macosUITests";
+			productName = "joycontrol-macosUITests";
+			productReference = F738727B25D3A2C300279B82 /* joycontrol-macosUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		F738725625D3A2C200279B82 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastSwiftUpdateCheck = 1240;
+				LastUpgradeCheck = 1240;
+				TargetAttributes = {
+					F738725D25D3A2C200279B82 = {
+						CreatedOnToolsVersion = 12.4;
+					};
+					F738726F25D3A2C300279B82 = {
+						CreatedOnToolsVersion = 12.4;
+						TestTargetID = F738725D25D3A2C200279B82;
+					};
+					F738727A25D3A2C300279B82 = {
+						CreatedOnToolsVersion = 12.4;
+						TestTargetID = F738725D25D3A2C200279B82;
+					};
+				};
+			};
+			buildConfigurationList = F738725925D3A2C200279B82 /* Build configuration list for PBXProject "joycontrol-macos" */;
+			compatibilityVersion = "Xcode 9.3";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = F738725525D3A2C200279B82;
+			packageReferences = (
+				F73872D125D3A40400279B82 /* XCRemoteSwiftPackageReference "BluetoothDarwin" */,
+			);
+			productRefGroup = F738725F25D3A2C200279B82 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				F738725D25D3A2C200279B82 /* joycontrol-macos */,
+				F738726F25D3A2C300279B82 /* joycontrol-macosTests */,
+				F738727A25D3A2C300279B82 /* joycontrol-macosUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		F738725C25D3A2C200279B82 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F73872CC25D3A3CB00279B82 /* NintendoSwitchControllerSDP.plist in Resources */,
+				F738726925D3A2C300279B82 /* Preview Assets.xcassets in Resources */,
+				F738726625D3A2C300279B82 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F738726E25D3A2C300279B82 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F738727925D3A2C300279B82 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		F738725A25D3A2C200279B82 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F73872C525D3A3CB00279B82 /* HCIWriteExtendedInquiryResponse.swift in Sources */,
+				F73872C925D3A3CB00279B82 /* ControllerState.swift in Sources */,
+				F73872C625D3A3CB00279B82 /* Common.swift in Sources */,
+				F73872CB25D3A3CB00279B82 /* FlashMemory.swift in Sources */,
+				F73872CA25D3A3CB00279B82 /* OutputReport.swift in Sources */,
+				F73872CD25D3A3CB00279B82 /* Protocol.swift in Sources */,
+				F73872C825D3A3CB00279B82 /* InputReport.swift in Sources */,
+				F73872C725D3A3CB00279B82 /* ContentView.swift in Sources */,
+				F738726225D3A2C200279B82 /* joycontrol_macosApp.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F738726C25D3A2C300279B82 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F738727525D3A2C300279B82 /* joycontrol_macosTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F738727725D3A2C300279B82 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F738728025D3A2C300279B82 /* joycontrol_macosUITests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		F738727225D3A2C300279B82 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = F738725D25D3A2C200279B82 /* joycontrol-macos */;
+			targetProxy = F738727125D3A2C300279B82 /* PBXContainerItemProxy */;
+		};
+		F738727D25D3A2C300279B82 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = F738725D25D3A2C200279B82 /* joycontrol-macos */;
+			targetProxy = F738727C25D3A2C300279B82 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		F738728225D3A2C300279B82 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 11.1;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		F738728325D3A2C300279B82 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 11.1;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+			};
+			name = Release;
+		};
+		F738728525D3A2C300279B82 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "joycontrol-macos/joycontrol_macos.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_ASSET_PATHS = "\"joycontrol-macos/Preview Content\"";
+				ENABLE_PREVIEWS = YES;
+				INFOPLIST_FILE = "joycontrol-macos/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "joeyjacobs.joycontrol-macos";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		F738728625D3A2C300279B82 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "joycontrol-macos/joycontrol_macos.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_ASSET_PATHS = "\"joycontrol-macos/Preview Content\"";
+				ENABLE_PREVIEWS = YES;
+				INFOPLIST_FILE = "joycontrol-macos/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "joeyjacobs.joycontrol-macos";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		F738728825D3A2C300279B82 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = "joycontrol-macosTests/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "joeyjacobs.joycontrol-macosTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/joycontrol-macos.app/Contents/MacOS/joycontrol-macos";
+			};
+			name = Debug;
+		};
+		F738728925D3A2C300279B82 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = "joycontrol-macosTests/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "joeyjacobs.joycontrol-macosTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/joycontrol-macos.app/Contents/MacOS/joycontrol-macos";
+			};
+			name = Release;
+		};
+		F738728B25D3A2C300279B82 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = "joycontrol-macosUITests/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "joeyjacobs.joycontrol-macosUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TEST_TARGET_NAME = "joycontrol-macos";
+			};
+			name = Debug;
+		};
+		F738728C25D3A2C300279B82 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = "joycontrol-macosUITests/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "joeyjacobs.joycontrol-macosUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TEST_TARGET_NAME = "joycontrol-macos";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		F738725925D3A2C200279B82 /* Build configuration list for PBXProject "joycontrol-macos" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F738728225D3A2C300279B82 /* Debug */,
+				F738728325D3A2C300279B82 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		F738728425D3A2C300279B82 /* Build configuration list for PBXNativeTarget "joycontrol-macos" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F738728525D3A2C300279B82 /* Debug */,
+				F738728625D3A2C300279B82 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		F738728725D3A2C300279B82 /* Build configuration list for PBXNativeTarget "joycontrol-macosTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F738728825D3A2C300279B82 /* Debug */,
+				F738728925D3A2C300279B82 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		F738728A25D3A2C300279B82 /* Build configuration list for PBXNativeTarget "joycontrol-macosUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F738728B25D3A2C300279B82 /* Debug */,
+				F738728C25D3A2C300279B82 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		F73872D125D3A40400279B82 /* XCRemoteSwiftPackageReference "BluetoothDarwin" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/PureSwift/BluetoothDarwin.git";
+			requirement = {
+				branch = master;
+				kind = branch;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		F73872D225D3A40400279B82 /* BluetoothDarwin */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = F73872D125D3A40400279B82 /* XCRemoteSwiftPackageReference "BluetoothDarwin" */;
+			productName = BluetoothDarwin;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = F738725625D3A2C200279B82 /* Project object */;
+}
