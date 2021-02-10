@@ -1,5 +1,7 @@
 # Experimental macOS Port of https://github.com/mart1nro/joycontrol
 
+Adapting joycontrol's usage of bluez to macOS IOBluetooth/CoreBluetooth with support from https://github.com/PureSwift/BluetoothDarwin for lower-level API access.
+
 ## Getting Started
 
 1. Run from Xcode
