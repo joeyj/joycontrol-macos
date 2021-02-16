@@ -6,23 +6,21 @@
 //
 
 import SwiftUI
-import CoreBluetooth
-
-protocol ControllerButtonDelegate {
-    func controllerButtonPushed(buttons: [ControllerButton]) -> Void
-    func setAllowPairing(_ value: Bool) -> Void
-}
+import Combine
+import os.log
 
 struct ContentView: View {
-    init(delegate: ControllerButtonDelegate) {
-        self.delegate = delegate
-    }
-    private var delegate: ControllerButtonDelegate
-    @State private var toggleAllowPairing = false
+    var logger: Logger = Logger()
+    @AppStorage("toggleAllowPairing") private var toggleAllowPairing = false
+    @AppStorage("deviceAddress") private var deviceAddress: String = ""
+    @ObservedObject public var bluetoothManager: BluetoothManager = BluetoothManager.shared
     var body: some View {
         VStack(alignment: .center, spacing: nil, content: {
             Toggle("Allow Pairing", isOn:$toggleAllowPairing ).onChange(of: toggleAllowPairing, perform: { value in
-                self.delegate.setAllowPairing(value)
+                setAllowPairing(value)
+            })
+            TextField("Nintendo Switch Device Address", text: $deviceAddress)
+            Button("Connect", action: { bluetoothManager.setupNintendoSwitchDevice($deviceAddress.wrappedValue)
             })
             HStack(alignment: .center, spacing: 120, content: {
                 controllerButton(ControllerButton.zl)
@@ -63,29 +61,37 @@ struct ContentView: View {
                 controllerButton(ControllerButton.home)
             })
         }).toggleStyle(SwitchToggleStyle())
+        .onReceive(Just(bluetoothManager), perform: {_ in
+            if deviceAddress == "" {
+                deviceAddress = bluetoothManager.deviceAddress
+            }
+        })
     }
     func controllerButton(_ title: ControllerButton) -> Button<Text> {
         return Button(title.rawValue, action: {
-            delegate.controllerButtonPushed(buttons: [title])
+            controllerButtonPushed(buttons: [title])
         })
     }
-    
-}
-
-func controllerButton(title: String) -> Button<Text> {
-    return Button(title, action: {})
-}
-
-class NoopControllerDelegate: ControllerButtonDelegate {
     func controllerButtonPushed(buttons: [ControllerButton]) {
+        guard bluetoothManager.controllerProtocol != nil else {
+            logger.info("controllerProtocol not initialized")
+            return
+        }
+        logger.info(#function)
+        logger.info("\(String(describing: buttons))")
+        buttonPush(controllerState: bluetoothManager.controllerProtocol!.controllerState!,buttons:buttons)
     }
-    func setAllowPairing(_ value: Bool) {
-        
+    func setAllowPairing(_ allowPairing: Bool) {
+        if (allowPairing) {
+            bluetoothManager.startScan()
+        } else {
+            bluetoothManager.stopScan()
+        }
     }
 }
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
-        ContentView(delegate: NoopControllerDelegate())
+        ContentView()
     }
 }

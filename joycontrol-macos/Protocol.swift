@@ -128,7 +128,7 @@ public class ControllerProtocol {
         }
         var lastSent = Date()
         // send state at 66Hz
-        let sendDelay = 0.001 // 0.015 This appears too slow
+        let sendDelay = 0.015 // 0.015 This appears too slow
         DispatchQueue.main.async {
             self.inputReportModeTimer = Timer.scheduledTimer(withTimeInterval: sendDelay, repeats: true) {
                 _ in
