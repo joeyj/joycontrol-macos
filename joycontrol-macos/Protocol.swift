@@ -152,9 +152,6 @@ public class ControllerProtocol {
         if outputReportId == OutputReportID.subCommand {
             _ = try! self.replyToSubCommand(report)
         }
-        else if outputReportId == OutputReportID.rumbleOnly {
-            return
-        }
         else {
             logger.info("Output report \(String(describing: outputReportId)) not implemented - ignoring")
         }

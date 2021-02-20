@@ -119,11 +119,11 @@ public class BluetoothManager: NSObject, IOBluetoothL2CAPChannelDelegate, Observ
         }
         logger.info(#function)
         var channel: IOBluetoothL2CAPChannel? = IOBluetoothL2CAPChannel()
-        if device.openL2CAPChannelAsync(&channel, withPSM: BluetoothManager.controlPsm, delegate: self) != kIOReturnSuccess {
+        if device.openL2CAPChannelSync(&channel, withPSM: BluetoothManager.controlPsm, delegate: self) != kIOReturnSuccess {
             logger.info("Failed to open l2cap channel \(BluetoothManager.controlPsm)")
         }
         var channel2: IOBluetoothL2CAPChannel? = IOBluetoothL2CAPChannel()
-        if device.openL2CAPChannelAsync(&channel2, withPSM: BluetoothManager.interruptPsm, delegate: self) != kIOReturnSuccess {
+        if device.openL2CAPChannelSync(&channel2, withPSM: BluetoothManager.interruptPsm, delegate: self) != kIOReturnSuccess {
             logger.info("Failed to open l2cap channel \(BluetoothManager.interruptPsm)")
         }
     }
@@ -143,6 +143,8 @@ public class BluetoothManager: NSObject, IOBluetoothL2CAPChannelDelegate, Observ
         if l2capChannel == controllerProtocol?.transport {
             let data = getDataFromChannel(data: dataPointer, length: dataLength)
             controllerProtocol?.reportReceived(data)
+        } else {
+            fatalError("Received data from non-interrupt channel.")
         }
     }
     func sendEmptyInputReport(l2capChannel: IOBluetoothL2CAPChannel) -> IOReturn {
@@ -212,7 +214,7 @@ public class BluetoothManager: NSObject, IOBluetoothL2CAPChannelDelegate, Observ
             logger.info("Detected powerState change: \(self.connected) -> \(isConnected)")
             connected = isConnected
             if connected {
-            setupPeripheral()
+                setupPeripheral()
             }
         }
     }

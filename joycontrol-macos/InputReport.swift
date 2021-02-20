@@ -231,10 +231,6 @@ public class InputReport : CustomDebugStringConvertible
     public func bytes() -> Bytes
     {
         let Id = self.getInputReportId()
-        if (Id == InputReportId.standard)
-        {
-            return Array(self.data[0...50])
-        }
         if (Id == InputReportId.imu)
         {
             return Array(self.data[0...13])
@@ -245,7 +241,6 @@ public class InputReport : CustomDebugStringConvertible
         }
         
         return Array(self.data[0...50])
-        
     }
     public var debugDescription: String
     {
