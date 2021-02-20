@@ -11,14 +11,15 @@ import os.log
 
 struct ContentView: View {
     var logger: Logger = Logger()
-    @AppStorage("toggleAllowPairing") private var toggleAllowPairing = false
+    @State public var toggleAllowPairing: Bool
     @AppStorage("deviceAddress") private var deviceAddress: String = ""
     @ObservedObject public var bluetoothManager: BluetoothManager = BluetoothManager.shared
     var body: some View {
         VStack(alignment: .center, spacing: nil, content: {
-            Toggle("Allow Pairing", isOn:$toggleAllowPairing ).onChange(of: toggleAllowPairing, perform: { value in
-                setAllowPairing(value)
-            })
+            Toggle("Allow Pairing", isOn:$toggleAllowPairing)
+                .onChange(of: toggleAllowPairing) {value in
+                    setAllowPairing(value)
+                }
             TextField("Nintendo Switch Device Address", text: $deviceAddress)
             Button("Connect", action: { bluetoothManager.setupNintendoSwitchDevice($deviceAddress.wrappedValue)
             })
@@ -61,9 +62,9 @@ struct ContentView: View {
                 controllerButton(ControllerButton.home)
             })
         }).toggleStyle(SwitchToggleStyle())
-        .onReceive(Just(bluetoothManager), perform: {_ in
+        .onReceive(Just(bluetoothManager), perform: {x in
             if deviceAddress == "" {
-                deviceAddress = bluetoothManager.deviceAddress
+                deviceAddress = x.deviceAddress
             }
         })
     }
@@ -92,6 +93,6 @@ struct ContentView: View {
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
-        ContentView()
+        ContentView(toggleAllowPairing: false)
     }
 }

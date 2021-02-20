@@ -43,6 +43,12 @@ public class BluetoothManager: NSObject, IOBluetoothL2CAPChannelDelegate, Observ
         try! host.writeScanEnable(scanEnable: HCIWriteScanEnable.ScanEnable.inquiryAndPageScan)
     }
     
+    public func getIsScanEnabled() -> Bool {
+        var readScanEnable: Int8 = 0
+        BluetoothManager.hostController.bluetoothHCIReadScanEnable(&readScanEnable)
+        return readScanEnable > 0
+    }
+    
     func ensureBluetoothControllerConfigured() {
         let host = HostController.default!
         let deviceName = "Pro Controller"
