@@ -62,7 +62,8 @@ struct ContentView: View {
                 controllerButton(ControllerButton.home)
             })
         }).toggleStyle(SwitchToggleStyle())
-        .onReceive(Just(bluetoothManager), perform: {output in
+        .onReceive(Just(bluetoothManager), perform: {
+            output in
             if deviceAddress == "" {
                 deviceAddress = output.deviceAddress
             }
