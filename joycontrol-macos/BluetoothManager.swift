@@ -7,15 +7,14 @@
 import SwiftUI
 import BluetoothDarwin
 import BluetoothHCI
-import CoreBluetooth
+import CBluetoothDarwin
 import Foundation
 import IOBluetooth
 import os.log
 
-public class BluetoothManager: NSObject, CBPeripheralManagerDelegate, IOBluetoothL2CAPChannelDelegate, ObservableObject {
+public class BluetoothManager: NSObject, IOBluetoothL2CAPChannelDelegate, ObservableObject, IOBluetoothHostControllerDelegate {
     private static var controlPsm: BluetoothL2CAPPSM = BluetoothL2CAPPSM(kBluetoothL2CAPPSMHIDControl)
     private static var interruptPsm: BluetoothL2CAPPSM = BluetoothL2CAPPSM(kBluetoothL2CAPPSMHIDInterrupt)
-    private var manager: CBPeripheralManager!
     private var controlChannel: IOBluetoothL2CAPChannel?
     private var interruptChannel: IOBluetoothL2CAPChannel?
     private var serviceRecord: IOBluetoothSDPServiceRecord?
@@ -24,10 +23,12 @@ public class BluetoothManager: NSObject, CBPeripheralManagerDelegate, IOBluetoot
     public var controllerProtocol: ControllerProtocol?
     @objc @Published public var deviceAddress: String = ""
     public static var shared: BluetoothManager = BluetoothManager()
+    private static let hostController = IOBluetoothHostController()
+    private var connected: Bool = false
     
     private override init() {
         super.init()
-        manager = CBPeripheralManager.init(delegate: self, queue: nil, options: nil)
+        BluetoothManager.hostController.delegate = self
     }
     
     func stopScan() {
@@ -47,7 +48,7 @@ public class BluetoothManager: NSObject, CBPeripheralManagerDelegate, IOBluetoot
         let deviceName = "Pro Controller"
         try! host.writeLocalName(deviceName)
         
-        let controller = IOBluetoothHostController()
+        let controller = BluetoothManager.hostController
         let classNum = 0x000508
         controller.delegate = self
         controller.bluetoothHCIWriteClass(ofDevice: BluetoothClassOfDevice(classNum))
@@ -199,23 +200,11 @@ public class BluetoothManager: NSObject, CBPeripheralManagerDelegate, IOBluetoot
         logger.info(#function)
         logger.info("\(l2capChannel.debugDescription)")
     }
-    public func peripheralManagerDidUpdateState(_ peripheral: CBPeripheralManager) {
-        switch peripheral.state{
-        case .poweredOff:
-            logger.info("Powered off")
-        case .poweredOn:
-            logger.info("Powered on")
+    public func bluetoothHCIEventNotificationMessage(_ controller: IOBluetoothHostController, in message: IOBluetoothHCIEventNotificationMessageRef){
+        if controller.isReady() && !connected {
             setupPeripheral()
-        case .resetting:
-            logger.info("Resetting")
-        case .unauthorized:
-            logger.info("Unauthorized")
-        case .unknown:
-            logger.info("Unknown")
-        case .unsupported:
-            logger.info("Unsupported")
-        @unknown default:
-            fatalError("Unknown value found for \(peripheral.state)")
+            connected = true
+            // TODO: detect disconnected
         }
     }
 }
