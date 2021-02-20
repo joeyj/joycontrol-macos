@@ -200,11 +200,14 @@ public class BluetoothManager: NSObject, IOBluetoothL2CAPChannelDelegate, Observ
         logger.info(#function)
         logger.info("\(l2capChannel.debugDescription)")
     }
-    public func bluetoothHCIEventNotificationMessage(_ controller: IOBluetoothHostController, in message: IOBluetoothHCIEventNotificationMessageRef){
-        if controller.isReady() && !connected {
+    public func bluetoothHCIEventNotificationMessage(_ controller: IOBluetoothHostController, in message: IOBluetoothHCIEventNotificationMessageRef) {
+        let isConnected = controller.powerState == kBluetoothHCIPowerStateON
+        if isConnected != connected {
+            logger.info("Detected powerState change: \(self.connected) -> \(isConnected)")
+            connected = isConnected
+            if connected {
             setupPeripheral()
-            connected = true
-            // TODO: detect disconnected
+            }
         }
     }
 }
