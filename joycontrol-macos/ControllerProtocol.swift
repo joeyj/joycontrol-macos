@@ -54,10 +54,10 @@ class ControllerProtocol {
 
     /// Waits for the controller state to be sent.
     /// - Throws: ApplicationError.general if the connection was lost.
-    func sendControllerState() throws {
+    func sendControllerState() {
         logger.info(#function)
         if transport == nil {
-            throw ApplicationError.general("Transport not registered.")
+            fatalError("Transport not registered.")
         }
 
         controllerState!.sendCompleteSemaphore.wait() // wait for a send to complete
@@ -66,10 +66,10 @@ class ControllerProtocol {
     /// Sets timer byte and current button state in the input report and sends it.
     /// Fires sigIsSend event in the controller state afterwards.
     /// - Throws: ationError.general if the connection was lost.
-    func write(_ inputReport: InputReport) throws {
+    func write(_ inputReport: InputReport) {
         logger.info(#function)
         if transport == nil {
-            throw ApplicationError.general("Transport not registered.")
+            fatalError("Transport not registered.")
         }
         // set button and stick data of input report
         inputReport.setButtonStatus(controllerState!.buttonState.bytes())
@@ -104,13 +104,13 @@ class ControllerProtocol {
     }
 
     @objc
-    func sendInputReport() throws {
+    func sendInputReport() {
         logger.info(#function)
         let inputReport = try! InputReport(nil)
         inputReport.setVibratorInput()
         inputReport.setMisc()
         if inputReportMode == nil {
-            throw ApplicationError.general("Input report mode != set.")
+            fatalError("Input report mode != set.")
         }
         inputReport.setInputReportId(inputReportMode!)
 
@@ -123,10 +123,10 @@ class ControllerProtocol {
             return
         }
 
-        try! write(inputReport)
+        write(inputReport)
     }
 
-    func inputReportModeFull() throws {
+    func inputReportModeFull() {
         logger.info(#function)
         if inputReportModeTimer != nil {
             logger.info("already in input report mode")
@@ -141,7 +141,7 @@ class ControllerProtocol {
                     // don't send reports too closely together
                     return
                 }
-                try! self.sendInputReport()
+                self.sendInputReport()
                 lastSent = Date()
             }
         }
@@ -165,7 +165,7 @@ class ControllerProtocol {
         // classify sub command
         let subCommand = report.getSubCommand()
         if subCommand == SubCommand.none {
-            throw ApplicationError.general("Received output report does not contain a sub command")
+            fatalError("Received output report does not contain a sub command")
         }
         logger.info("received output report - Sub command \(String(describing: subCommand))")
 
@@ -221,9 +221,9 @@ class ControllerProtocol {
     private func commandRequestDeviceInfo(_: Bytes) {
         let inputReport = createStandardInputReport()
         inputReport.setAck(0x82)
-        try! inputReport.sub0x02DeviceInfo(mac: hostAddress.bytes, controller: controller)
+        inputReport.sub0x02DeviceInfo(mac: hostAddress.bytes, controller: controller)
 
-        try! write(inputReport)
+        write(inputReport)
     }
 
     private func commandSetShipmentState(_: Bytes) {
@@ -232,7 +232,7 @@ class ControllerProtocol {
         inputReport.setAck(0x80)
         inputReport.replyToSubCommandId(SubCommand.setShipmentState)
 
-        try! write(inputReport)
+        write(inputReport)
     }
 
     /// Replies with 0x21 input report containing requested data from the flash memory.
@@ -253,7 +253,7 @@ class ControllerProtocol {
 
         let spiFlashData = Array(spiFlash.data[offset ... offset + Int(size) - 1])
         try! inputReport.sub0x10SpiFlashRead(offset, size, spiFlashData)
-        try! write(inputReport)
+        write(inputReport)
     }
 
     private func commandSetInputReportMode(_ subCommandData: Bytes) {
@@ -280,7 +280,7 @@ class ControllerProtocol {
         inputReport.setAck(0x80)
         inputReport.replyToSubCommandId(SubCommand.setInputReportMode)
 
-        try! write(inputReport)
+        write(inputReport)
     }
 
     private func commandTriggerButtonsElapsedTime(_: Bytes) throws {
@@ -298,7 +298,7 @@ class ControllerProtocol {
             throw ApplicationError.general(String(describing: controller))
         }
 
-        try! write(inputReport)
+        write(inputReport)
     }
 
     private func commandEnable6axisSensor(_: Bytes) {
@@ -307,7 +307,7 @@ class ControllerProtocol {
         inputReport.setAck(0x80)
         inputReport.replyToSubCommandId(SubCommand.enable6axisSensor)
 
-        try! write(inputReport)
+        write(inputReport)
     }
 
     private func commandEnableVibration(_: Bytes) {
@@ -316,7 +316,7 @@ class ControllerProtocol {
         inputReport.setAck(0x80)
         inputReport.replyToSubCommandId(SubCommand.enableVibration)
 
-        try! write(inputReport)
+        write(inputReport)
     }
 
     private func commandSetNfcIrMcuConfig(_: Bytes) {
@@ -334,7 +334,7 @@ class ControllerProtocol {
         for index in 0 ... data.count - 1 {
             inputReport.data[16 + index] = data[index]
         }
-        try! write(inputReport)
+        write(inputReport)
     }
 
     private func commandSetNfcIrMcuState(_ subCommandData: Bytes) throws {
@@ -353,7 +353,7 @@ class ControllerProtocol {
         } else {
             throw ArgumentError.invalid("Argument \(argument) of \(SubCommand.setNfcIrMcuState) not implemented.")
         }
-        try! write(inputReport)
+        write(inputReport)
     }
 
     private func commandSetPlayerLights(_: Bytes) {
@@ -362,7 +362,7 @@ class ControllerProtocol {
         inputReport.setAck(0x80)
         inputReport.replyToSubCommandId(SubCommand.setPlayerLights)
 
-        try! write(inputReport)
+        write(inputReport)
 
         setPlayerLightsSemaphore.signal()
     }

@@ -6,6 +6,7 @@
 //
 
 import Foundation
+let kDefaultOutputReportData = [0xA2] + Bytes(repeating: 0x00, count: 49)
 class OutputReport: CustomDebugStringConvertible {
     private var data: Bytes
 
@@ -16,7 +17,7 @@ class OutputReport: CustomDebugStringConvertible {
     }
 
     init(_ data: Bytes? = nil) throws {
-        let tempData = data ?? ([0xA2] + Bytes(repeating: 0x00, count: 49))
+        let tempData = data ?? kDefaultOutputReportData
 
         if tempData[0] != 0xA2 {
             throw ArgumentError.invalid("Output reports must start with a 0xA2 byte!")

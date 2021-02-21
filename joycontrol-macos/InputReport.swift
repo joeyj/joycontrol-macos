@@ -7,6 +7,7 @@
 
 import Bluetooth
 import Foundation
+let kDefaultInputReportData = [0xA1] + Bytes(repeating: 0x00, count: 361)
 /// Class to create Input Reports.
 ///
 /// Reference:
@@ -29,15 +30,11 @@ class InputReport: CustomDebugStringConvertible {
     }
 
     init(_ data: Bytes?) throws {
-        if data == nil {
-            self.data = Bytes(repeating: 0x00, count: 364)
-            self.data[0] = 0xA1
-        } else {
-            if data![0] != 0xA1 {
-                throw ArgumentError.invalid("Input reports must start with 0xA1")
-            }
-            self.data = data!
+        let tempData = data ?? kDefaultInputReportData
+        if tempData[0] != 0xA1 {
+            throw ArgumentError.invalid("Input reports must start with 0xA1")
         }
+        self.data = tempData
     }
 
     /// Clear sub command reply data of 0x21 input reports
@@ -158,16 +155,13 @@ class InputReport: CustomDebugStringConvertible {
     /// - Parameters:
     ///   - mac: Controller MAC address in Big Endian(6 Bytes)
     ///   - fmVersion: TODO
-    func sub0x02DeviceInfo(mac: BluetoothAddress.ByteValue, controller: Controller, fmVersion: Bytes? = nil) throws {
-        let fmVersion = fmVersion == nil ? [0x04, 0x00] : fmVersion!
-        if fmVersion.count != 2 {
-            throw ArgumentError.invalid("Firmware version must consist of 2 bytes!")
-        }
+    func sub0x02DeviceInfo(mac: BluetoothAddress.ByteValue, controller: Controller, fmVersion: (Byte, Byte)? = nil) {
+        let fmVersion = fmVersion == nil ? (0x04, 0x00) : fmVersion!
         replyToSubCommandId(SubCommand.requestDeviceInfo)
         // sub command reply data
         let offset = 16
-        data[offset] = fmVersion[0]
-        data[offset + 1] = fmVersion[1]
+        data[offset] = fmVersion.0
+        data[offset + 1] = fmVersion.1
         data[offset + 2] = controller.rawValue
         data[offset + 3] = 0x02
         data[offset + 4] = mac.0

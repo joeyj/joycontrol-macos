@@ -36,7 +36,7 @@ class StickState {
     private var hStick: Byte = 0
     private var vStick: Byte = 0
     private let calibration: StickCalibration
-    init(calibration: StickCalibration) throws {
+    init(calibration: StickCalibration) {
         self.calibration = calibration
     }
 
@@ -64,44 +64,44 @@ class StickState {
         vStick
     }
 
-    func setCenter() throws {
-        let calibration = try! getCalibration()
+    func setCenter() {
+        let calibration = getCalibration()
         hStick = calibration.hCenter
         vStick = calibration.vCenter
     }
 
     func isCenter(radius: Byte = 0) -> Bool {
-        let calibration = try! getCalibration()
+        let calibration = getCalibration()
 
         return calibration.hCenter - radius <= hStick && hStick <= calibration.hCenter + radius
             && calibration.vCenter - radius <= vStick && vStick <= calibration.vCenter + radius
     }
 
-    func setUp() throws {
-        let calibration = try! getCalibration()
+    func setUp() {
+        let calibration = getCalibration()
         hStick = calibration.hCenter
         vStick = calibration.vCenter + calibration.vMaxAboveCenter
     }
 
-    func setDown() throws {
-        let calibration = try! getCalibration()
+    func setDown() {
+        let calibration = getCalibration()
         hStick = calibration.hCenter
         vStick = calibration.vCenter - calibration.vMaxBelowCenter
     }
 
-    func setLeft() throws {
-        let calibration = try! getCalibration()
+    func setLeft() {
+        let calibration = getCalibration()
         hStick = calibration.hCenter - calibration.hMaxBelowCenter
         vStick = calibration.vCenter
     }
 
-    func setRight() throws {
-        let calibration = try! getCalibration()
+    func setRight() {
+        let calibration = getCalibration()
         hStick = calibration.hCenter + calibration.hMaxAboveCenter
         vStick = calibration.vCenter
     }
 
-    func getCalibration() throws -> StickCalibration {
+    func getCalibration() -> StickCalibration {
         calibration
     }
 
@@ -136,8 +136,8 @@ struct ControllerState {
 
             let calibration = StickCalibration(calibrationData)
 
-            leftStickState = try! StickState(calibration: calibration)
-            try! leftStickState!.setCenter()
+            leftStickState = StickState(calibration: calibration)
+            leftStickState!.setCenter()
         } else {
             leftStickState = nil
         }
@@ -147,8 +147,8 @@ struct ControllerState {
 
             let calibration = StickCalibration(calibrationData)
 
-            rightStickState = try! StickState(calibration: calibration)
-            try! rightStickState!.setCenter()
+            rightStickState = StickState(calibration: calibration)
+            rightStickState!.setCenter()
         } else {
             rightStickState = nil
         }
@@ -164,7 +164,7 @@ struct ControllerState {
 
     /// Invokes protocol.sendControllerState(). Returns after the controller state was sent.
     func send() {
-        try! controllerProtocol.sendControllerState()
+        controllerProtocol.sendControllerState()
     }
 
     /// Waits until the switch is paired with the controller and accepts button commands
