@@ -130,7 +130,9 @@ public class NintendoSwitchBluetoothManager: NSObject, IOBluetoothL2CAPChannelDe
                 return
             }
             self.interruptChannelOutgoing?.close()
+            self.interruptChannelOutgoing = nil
             self.controlChannelOutgoing?.close()
+            self.controlChannelOutgoing = nil
             nintendoSwitch.closeConnection()
         }
     }
