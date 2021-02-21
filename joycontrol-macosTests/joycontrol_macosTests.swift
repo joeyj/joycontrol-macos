@@ -8,6 +8,7 @@
 import XCTest
 @testable import joycontrol_macos
 
+// swiftlint:disable:next type_name
 class joycontrol_macosTests: XCTestCase {
 
     override func setUpWithError() throws {

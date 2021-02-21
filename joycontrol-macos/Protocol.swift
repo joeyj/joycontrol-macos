@@ -10,10 +10,11 @@ import Foundation
 import IOBluetooth
 import os.log
 
-public protocol ControllerProtocolDelgate {
+public protocol ControllerProtocolDelgate: class {
     func controllerProtocolConnectionLost()
 }
 
+// swiftlint:disable:next type_body_length
 public class ControllerProtocol {
     private var logger = Logger()
     public var controller: Controller
@@ -26,8 +27,9 @@ public class ControllerProtocol {
     public var controllerState: ControllerState?
     private var inputReportModeTimer: Timer?
     private var hostAddress: BluetoothAddress
-    private let delegate: ControllerProtocolDelgate
-    public init(controller: Controller, spiFlash: FlashMemory, hostAddress: BluetoothAddress, delegate: ControllerProtocolDelgate) {
+    private weak var delegate: ControllerProtocolDelgate?
+    public init(controller: Controller, spiFlash: FlashMemory,
+                hostAddress: BluetoothAddress, delegate: ControllerProtocolDelgate) {
         self.controller = controller
         self.spiFlash = spiFlash
 
@@ -67,18 +69,8 @@ public class ControllerProtocol {
         }
         // set button and stick data of input report
         inputReport.setButtonStatus(controllerState!.buttonState.bytes())
-        var leftStick: Bytes
-        var rightStick: Bytes
-        if controllerState!.leftStickState == nil {
-            leftStick = [0x00, 0x00, 0x00]
-        } else {
-            leftStick = controllerState!.leftStickState!.bytes()
-        }
-        if controllerState!.rightStickState == nil {
-            rightStick = [0x00, 0x00, 0x00]
-        } else {
-            rightStick = controllerState!.rightStickState!.bytes()
-        }
+        let leftStick = controllerState?.leftStickState?.bytes() ?? [0x00, 0x00, 0x00]
+        let rightStick = controllerState?.rightStickState?.bytes() ?? [0x00, 0x00, 0x00]
         inputReport.setStickStatus(leftStick, rightStick)
 
         // set timer byte of input report
@@ -86,8 +78,7 @@ public class ControllerProtocol {
         let newTimerValue = UInt16(inputReportTimer) + UInt16(1)
         inputReportTimer = Byte(newTimerValue > Byte.max ? 0 : newTimerValue)
         logger.info("new inputReportTimer value: \(self.inputReportTimer)")
-        var bytes =
-            inputReport.bytes()
+        var bytes = inputReport.bytes()
         transport!.writeSync(&bytes, length: UInt16(bytes.count))
 
         controllerState!.sendCompleteSemaphore.signal()
@@ -105,7 +96,7 @@ public class ControllerProtocol {
             inputReportModeTimer?.invalidate()
             inputReportMode = nil
         }
-        delegate.controllerProtocolConnectionLost()
+        delegate?.controllerProtocolConnectionLost()
     }
 
     @objc func sendInputReport() throws {
@@ -140,8 +131,7 @@ public class ControllerProtocol {
         // send state at 66Hz
         let sendDelay = 0.015 // 0.015 This appears too slow
         DispatchQueue.main.async {
-            self.inputReportModeTimer = Timer.scheduledTimer(withTimeInterval: sendDelay, repeats: true) {
-                _ in
+            self.inputReportModeTimer = Timer.scheduledTimer(withTimeInterval: sendDelay, repeats: true) { _ in
                 if Date().timeIntervalSince(lastSent).isLess(than: sendDelay) {
                     // don't send reports too closely together
                     return
@@ -165,6 +155,7 @@ public class ControllerProtocol {
         }
     }
 
+    // swiftlint:disable:next cyclomatic_complexity
     private func replyToSubCommand(_ report: OutputReport) throws -> Bool {
         // classify sub command
         let subCommand = report.getSubCommand()
@@ -175,40 +166,45 @@ public class ControllerProtocol {
 
         let subCommandData = report.getSubCommandData()!
 
-        // answer to sub command
-        if subCommand == SubCommand.requestDeviceInfo {
+        switch subCommand {
+        case SubCommand.requestDeviceInfo:
             commandRequestDeviceInfo(subCommandData)
-        } else if subCommand == SubCommand.setShipmentState {
+        case SubCommand.setShipmentState:
             commandSetShipmentState(subCommandData)
-        } else if subCommand == SubCommand.spiFlashRead {
+        case SubCommand.spiFlashRead:
             commandSpiFlashRead(subCommandData)
-        } else if subCommand == SubCommand.setInputReportMode {
+        case SubCommand.setInputReportMode:
             commandSetInputReportMode(subCommandData) // TODO: when to stop input report mode?
-        } else if subCommand == SubCommand.triggerButtonsElapsedTime {
+        case SubCommand.triggerButtonsElapsedTime:
             try! commandTriggerButtonsElapsedTime(subCommandData)
-        } else if subCommand == SubCommand.enable6axisSensor {
+        case SubCommand.enable6axisSensor:
             commandEnable6axisSensor(subCommandData)
-        } else if subCommand == SubCommand.enableVibration {
+        case SubCommand.enableVibration:
             commandEnableVibration(subCommandData)
-        } else if subCommand == SubCommand.setNfcIrMcuConfig {
+        case SubCommand.setNfcIrMcuConfig:
             commandSetNfcIrMcuConfig(subCommandData)
-        } else if subCommand == SubCommand.setNfcIrMcuState {
+        case SubCommand.setNfcIrMcuState:
             try! commandSetNfcIrMcuState(subCommandData)
-        } else if subCommand == SubCommand.setPlayerLights {
+        case SubCommand.setPlayerLights:
             commandSetPlayerLights(subCommandData)
-        } else if subCommand == SubCommand.setHCIState {
+        case SubCommand.setHCIState:
             // assume Nintendo Switch is going to sleep
             connectionLost()
-        } else {
+        default:
             logger.info("Sub command 0x{subCommand.value:02x} not implemented - ignoring")
         }
         return true
     }
 
-    private func commandRequestDeviceInfo(_: Bytes) {
+    private func createStandardInputReport() -> InputReport {
         let inputReport = try! InputReport(nil)
         inputReport.setStandardInputReport()
         inputReport.setMisc()
+        return inputReport
+    }
+
+    private func commandRequestDeviceInfo(_: Bytes) {
+        let inputReport = createStandardInputReport()
         inputReport.setAck(0x82)
         try! inputReport.sub0x02DeviceInfo(mac: hostAddress.bytes, controller: controller)
 
@@ -216,9 +212,7 @@ public class ControllerProtocol {
     }
 
     private func commandSetShipmentState(_: Bytes) {
-        let inputReport = try! InputReport(nil)
-        inputReport.setStandardInputReport()
-        inputReport.setMisc()
+        let inputReport = createStandardInputReport()
 
         inputReport.setAck(0x80)
         inputReport.replyToSubCommandId(SubCommand.setShipmentState)
@@ -229,17 +223,15 @@ public class ControllerProtocol {
     /// Replies with 0x21 input report containing requested data from the flash memory.
     /// - Parameter subCommandData: input report sub command data bytes
     private func commandSpiFlashRead(_ subCommandData: Bytes) {
-        let inputReport = try! InputReport(nil)
-        inputReport.setStandardInputReport()
-        inputReport.setMisc()
+        let inputReport = createStandardInputReport()
 
         inputReport.setAck(0x90)
 
         // parse offset
         var offset = 0
         var digit = 1
-        for i in 0 ... 3 {
-            offset += Int(subCommandData[i]) * digit
+        for index in 0 ... 3 {
+            offset += Int(subCommandData[index]) * digit
             digit *= 0x100
         }
         let size = subCommandData[4]
@@ -252,13 +244,15 @@ public class ControllerProtocol {
     private func commandSetInputReportMode(_ subCommandData: Bytes) {
         let requestedInputReportMode = InputReportId(rawValue: subCommandData[0])!
         if inputReportMode == requestedInputReportMode {
-            logger.info("Already in input report mode \(String(describing: requestedInputReportMode)) - ignoring request")
+            let debugDesc = String(describing: requestedInputReportMode)
+            logger.info("Already in input report mode \(debugDesc) - ignoring request")
         }
         // Start input report reader
         if [InputReportId.imu, InputReportId.setNfcData].contains(requestedInputReportMode) {
             try! inputReportModeFull()
         } else {
-            logger.info("input report mode \(String(describing: requestedInputReportMode)) not implemented - ignoring request")
+            let debugDesc = String(describing: requestedInputReportMode)
+            logger.info("input report mode \(debugDesc) not implemented - ignoring request")
             return
         }
 
@@ -266,9 +260,7 @@ public class ControllerProtocol {
         inputReportMode = requestedInputReportMode
 
         // Send acknowledgement
-        let inputReport = try! InputReport(nil)
-        inputReport.setStandardInputReport()
-        inputReport.setMisc()
+        let inputReport = createStandardInputReport()
 
         inputReport.setAck(0x80)
         inputReport.replyToSubCommandId(SubCommand.setInputReportMode)
@@ -277,9 +269,7 @@ public class ControllerProtocol {
     }
 
     private func commandTriggerButtonsElapsedTime(_: Bytes) throws {
-        let inputReport = try! InputReport(nil)
-        inputReport.setStandardInputReport()
-        inputReport.setMisc()
+        let inputReport = createStandardInputReport()
 
         inputReport.setAck(0x83)
         inputReport.replyToSubCommandId(SubCommand.triggerButtonsElapsedTime)
@@ -297,9 +287,7 @@ public class ControllerProtocol {
     }
 
     private func commandEnable6axisSensor(_: Bytes) {
-        let inputReport = try! InputReport(nil)
-        inputReport.setStandardInputReport()
-        inputReport.setMisc()
+        let inputReport = createStandardInputReport()
 
         inputReport.setAck(0x80)
         inputReport.replyToSubCommandId(SubCommand.enable6axisSensor)
@@ -308,9 +296,7 @@ public class ControllerProtocol {
     }
 
     private func commandEnableVibration(_: Bytes) {
-        let inputReport = try! InputReport(nil)
-        inputReport.setStandardInputReport()
-        inputReport.setMisc()
+        let inputReport = createStandardInputReport()
 
         inputReport.setAck(0x80)
         inputReport.replyToSubCommandId(SubCommand.enableVibration)
@@ -320,44 +306,41 @@ public class ControllerProtocol {
 
     private func commandSetNfcIrMcuConfig(_: Bytes) {
         // TODO: NFC
-        let inputReport = try! InputReport(nil)
-        inputReport.setStandardInputReport()
-        inputReport.setMisc()
+        let inputReport = createStandardInputReport()
 
         inputReport.setAck(0xA0)
         inputReport.replyToSubCommandId(SubCommand.setNfcIrMcuConfig)
 
-        let data: Bytes = [1, 0, 255, 0, 8, 0, 27, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 200]
-        for i in 0 ... data.count - 1 {
-            inputReport.data[16 + i] = data[i]
+        let data: Bytes = [1, 0, 255, 0, 8, 0, 27, 1, 0, 0, 0, 0, 0, 0,
+                           0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                           0, 0, 0, 0, 200]
+        for index in 0 ... data.count - 1 {
+            inputReport.data[16 + index] = data[index]
         }
         try! write(inputReport)
     }
 
     private func commandSetNfcIrMcuState(_ subCommandData: Bytes) throws {
         // TODO: NFC
-        let inputReport = try! InputReport(nil)
-        inputReport.setStandardInputReport()
-        inputReport.setMisc()
+        let inputReport = createStandardInputReport()
+        let argument = subCommandData[0]
 
-        if subCommandData[0] == 0x01 {
+        if argument == 0x01 {
             // 0x01 = Resume
             inputReport.setAck(0x80)
             inputReport.replyToSubCommandId(SubCommand.setNfcIrMcuState)
-        } else if subCommandData[0] == 0x00 {
+        } else if argument == 0x00 {
             // 0x00 = Suspend
             inputReport.setAck(0x80)
             inputReport.replyToSubCommandId(SubCommand.setNfcIrMcuState)
         } else {
-            throw ArgumentError.invalid("Argument \(subCommandData[0]) of \(SubCommand.setNfcIrMcuState) not implemented.")
+            throw ArgumentError.invalid("Argument \(argument) of \(SubCommand.setNfcIrMcuState) not implemented.")
         }
         try! write(inputReport)
     }
 
     private func commandSetPlayerLights(_: Bytes) {
-        let inputReport = try! InputReport(nil)
-        inputReport.setStandardInputReport()
-        inputReport.setMisc()
+        let inputReport = createStandardInputReport()
 
         inputReport.setAck(0x80)
         inputReport.replyToSubCommandId(SubCommand.setPlayerLights)

@@ -8,7 +8,8 @@
 import SwiftUI
 
 @main
-struct joycontrol_macosApp: App {
+struct JoycontrolMacosApp: App {
+    // swiftlint:disable:next weak_delegate
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate: AppDelegate
     var body: some Scene {
         WindowGroup {

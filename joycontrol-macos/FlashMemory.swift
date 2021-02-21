@@ -14,28 +14,24 @@ public class FlashMemory {
     ///   - spiFlashMemoryData: data from a memory dump (can be created using dumpSpiFlash.py).
     ///   - size: size of the memory dump, should be constant
     public init(spiFlashMemoryData: Bytes? = nil, size: Int = 0x80000) throws {
-        var Data: Bytes
+        var tempData: Bytes
         if spiFlashMemoryData == nil {
-            Data = Array(repeating: 0xFF, count: size) // Blank data is all 0xFF
+            tempData = Array(repeating: 0xFF, count: size) // Blank data is all 0xFF
             defaultStickCal = true
         } else {
-            Data = spiFlashMemoryData!
+            tempData = spiFlashMemoryData!
         }
-        if Data.count != size {
+        if tempData.count != size {
             throw ApplicationError.general("Given data size {len(spiFlashMemoryData)} does not match size {size}.")
         }
         // set default controller stick calibration
         if defaultStickCal {
             // L-stick factory calibration
-            Data.replaceSubrange(0x603D ... 0x6045, with: [0x00, 0x07, 0x70, 0x00, 0x08, 0x80, 0x00, 0x07, 0x70])
+            tempData.replaceSubrange(0x603D ... 0x6045, with: [0x00, 0x07, 0x70, 0x00, 0x08, 0x80, 0x00, 0x07, 0x70])
             // R-stick factory calibration
-            Data.replaceSubrange(0x6046 ... 0x604E, with: [0x00, 0x08, 0x80, 0x00, 0x07, 0x70, 0x00, 0x07, 0x70])
+            tempData.replaceSubrange(0x6046 ... 0x604E, with: [0x00, 0x08, 0x80, 0x00, 0x07, 0x70, 0x00, 0x07, 0x70])
         }
-        data = Data
-    }
-
-    public func __getitem__(item: Int) -> Byte {
-        return data[item]
+        data = tempData
     }
 
     public func getFactoryLStickCalibration() -> Bytes {

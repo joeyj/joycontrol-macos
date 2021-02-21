@@ -28,12 +28,12 @@ public enum Controller: Byte {
 }
 
 public enum Utils {
-    public static func getBit(_ value: Byte, _ n: Byte) -> Bool {
-        return (value >> n & 1) != 0
+    public static func getBit(_ value: Byte, _ bit: Byte) -> Bool {
+        return (value >> bit & 1) != 0
     }
 
-    public static func flipBit(_ value: Byte, _ n: Byte) -> Byte {
-        return value ^ (1 << n)
+    public static func flipBit(_ value: Byte, _ bit: Byte) -> Byte {
+        return value ^ (1 << bit)
     }
 }
 
@@ -73,6 +73,7 @@ public enum InputReportId: Byte {
 }
 
 public enum ControllerButton: String {
+    // swiftlint:disable identifier_name
     case y,
          x,
          b,
@@ -93,4 +94,5 @@ public enum ControllerButton: String {
          zl,
          sr,
          sl
+    // swiftlint:enable identifier_name
 }

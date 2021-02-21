@@ -41,7 +41,7 @@ struct ContentView: View {
             })
             HStack(alignment: .center, spacing: 60, content: {
                 controllerButton(ControllerButton.leftStick)
-                VStack(alignment: /*@START_MENU_TOKEN@*/ .center/*@END_MENU_TOKEN@*/, spacing: /*@START_MENU_TOKEN@*/nil/*@END_MENU_TOKEN@*/, content: {
+                VStack(alignment: .center, spacing: nil, content: {
                     controllerButton(ControllerButton.x)
                     HStack(content: {
                         controllerButton(ControllerButton.y)
@@ -51,7 +51,7 @@ struct ContentView: View {
                 })
             })
             HStack(alignment: .center, spacing: 60, content: {
-                VStack(alignment: /*@START_MENU_TOKEN@*/ .center/*@END_MENU_TOKEN@*/, spacing: /*@START_MENU_TOKEN@*/nil/*@END_MENU_TOKEN@*/, content: {
+                VStack(alignment: .center, spacing: nil, content: {
                     controllerButton(ControllerButton.up)
                     HStack(content: {
                         controllerButton(ControllerButton.left)
@@ -68,8 +68,7 @@ struct ContentView: View {
         })
             .padding()
             .toggleStyle(SwitchToggleStyle())
-            .onReceive(Just(bluetoothManager), perform: {
-                output in
+            .onReceive(Just(bluetoothManager), perform: { output in
                 if deviceAddress == "" {
                     deviceAddress = output.deviceAddress
                 }

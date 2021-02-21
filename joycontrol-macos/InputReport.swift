@@ -27,8 +27,8 @@ public class InputReport: CustomDebugStringConvertible {
 
     /// Clear sub command reply data of 0x21 input reports
     public func clearSubCommand() {
-        for i in 14 ... 50 {
-            data[i] = 0x00
+        for index in 14 ... 50 {
+            data[index] = 0x00
         }
     }
 
@@ -50,8 +50,8 @@ public class InputReport: CustomDebugStringConvertible {
 
     /// - Parameter id: e.g. 0x21 Standard input reports used for sub command replies
     ///     0x30 Input reports with IMU data instead of sub command replies
-    public func setInputReportId(_ id: InputReportId) {
-        data[1] = id.rawValue
+    public func setInputReportId(_ inputReportId: InputReportId) {
+        data[1] = inputReportId.rawValue
     }
 
     public func getInputReportId() -> InputReportId {
@@ -114,8 +114,8 @@ public class InputReport: CustomDebugStringConvertible {
     public func set6axisData() {
         // TODO:
         // HACK: Set all 0 for now
-        for i in 14 ... 49 {
-            data[i] = 0x00
+        for index in 14 ... 49 {
+            data[index] = 0x00
         }
     }
 
@@ -123,13 +123,13 @@ public class InputReport: CustomDebugStringConvertible {
         if 50 + data.count > self.data.count {
             throw ArgumentError.invalid("Too much data.")
         }
-        for i in 0 ... data.count - 1 {
-            self.data[50 + i] = data[i]
+        for index in 0 ... data.count - 1 {
+            self.data[50 + index] = data[index]
         }
     }
 
-    public func replyToSubCommandId(_ id: SubCommand) {
-        data[15] = id.rawValue
+    public func replyToSubCommandId(_ subCommand: SubCommand) {
+        data[15] = subCommand.rawValue
     }
 
     public func getReplyToSubCommandId() -> SubCommand {
@@ -143,8 +143,7 @@ public class InputReport: CustomDebugStringConvertible {
     /// - Parameters:
     ///   - mac: Controller MAC address in Big Endian(6 Bytes)
     ///   - fmVersion: TODO
-    public func sub0x02DeviceInfo(mac: BluetoothAddress.ByteValue, fmVersion: Bytes? = nil, controller: Controller) throws
-    {
+    public func sub0x02DeviceInfo(mac: BluetoothAddress.ByteValue, fmVersion: Bytes? = nil, controller: Controller) throws {
         let fmVersion = fmVersion == nil ? [0x04, 0x00] : fmVersion!
         if fmVersion.count != 2 {
             throw ArgumentError.invalid("Firmware version must consist of 2 bytes!")
@@ -167,7 +166,7 @@ public class InputReport: CustomDebugStringConvertible {
     }
 
     public func sub0x10SpiFlashRead(_ offset: Int, _ size: Byte, _ data: Bytes) throws {
-        var Offset = offset
+        var tempOffset = offset
         if data.count != size {
             throw ArgumentError.invalid("Length of data \(data.count) does not match size \(size)")
         }
@@ -176,20 +175,19 @@ public class InputReport: CustomDebugStringConvertible {
         }
         replyToSubCommandId(SubCommand.spiFlashRead)
         // write offset to data
-        for i in 16 ... 19 {
-            self.data[i] = Byte(Offset % 0x100)
-            Offset = Offset / 0x100
+        for index in 16 ... 19 {
+            self.data[index] = Byte(tempOffset % 0x100)
+            tempOffset /= 0x100
         }
         self.data[20] = size
-        for i in 0 ... data.count - 1 {
-            self.data[21 + i] = data[i]
+        for index in 0 ... data.count - 1 {
+            self.data[21 + index] = data[index]
         }
     }
 
     /// Set sub command data for 0x04 reply.Arguments are in ms and must be divisible by 10.
-    public func sub0x04TriggerButtonsElapsedTime(LMs: Int = 0, RMs: Int = 0, ZLMs: Int = 0, ZRMs: Int = 0, SLMs: Int = 0, SRMs: Int = 0, HOMEMs: Int = 0) throws
-    {
-        if ![LMs, RMs, ZLMs, ZRMs, SLMs, SRMs, HOMEMs].allSatisfy({ x in x < 10 * 0xFFFF }) {
+    public func sub0x04TriggerButtonsElapsedTime(LMs: Int = 0, RMs: Int = 0, ZLMs: Int = 0, ZRMs: Int = 0, SLMs: Int = 0, SRMs: Int = 0, HOMEMs: Int = 0) throws {
+        if ![LMs, RMs, ZLMs, ZRMs, SLMs, SRMs, HOMEMs].allSatisfy({ value in value < 10 * 0xFFFF }) {
             throw ArgumentError.invalid("Values can not exceed \(10 * 0xFFFF) ms.")
         }
         set(0, LMs)
@@ -201,20 +199,20 @@ public class InputReport: CustomDebugStringConvertible {
         set(12, HOMEMs)
     }
 
-    public func set(_ offset: Byte, _ ms: Int) {
+    public func set(_ offset: Byte, _ valueInMs: Int) {
         // reply data offset
         let subCommandOffset = 16
-        let value = (ms / 10)
+        let value = (valueInMs / 10)
         data[subCommandOffset + Int(offset)] = Byte(0xFF & value)
         data[subCommandOffset + Int(offset) + 1] = Byte((0xFF00 & value) >> 8)
     }
 
     public func bytes() -> Bytes {
-        let Id = getInputReportId()
-        if Id == InputReportId.imu {
+        let inputReportId = getInputReportId()
+        if inputReportId == InputReportId.imu {
             return Array(data[0 ... 13])
         }
-        if Id == InputReportId.setNfcData {
+        if inputReportId == InputReportId.setNfcData {
             return Array(data[0 ... 362])
         }
 
@@ -222,13 +220,13 @@ public class InputReport: CustomDebugStringConvertible {
     }
 
     public var debugDescription: String {
-        let Id = "Input \(getInputReportId())"
-        var Info = SubCommand.none
-        var Bytes = ""
+        let reportId = "Input \(getInputReportId())"
+        var subCommand = SubCommand.none
+        var bytesDescription = ""
         if getInputReportId() == InputReportId.standard {
-            Info = getReplyToSubCommandId()
-            Bytes = bytes().debugDescription
+            subCommand = getReplyToSubCommandId()
+            bytesDescription = bytes().debugDescription
         }
-        return "\(Id) \(Info)\n\(Bytes)"
+        return "\(reportId) \(subCommand)\n\(bytesDescription)"
     }
 }

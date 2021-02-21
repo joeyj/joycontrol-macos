@@ -9,23 +9,23 @@ import Foundation
 public class OutputReport: CustomDebugStringConvertible {
     private var data: Bytes
     public init(_ data: Bytes? = nil) throws {
-        var Data = data ?? Array(repeating: 0x00, count: 50)
+        var tempData = data ?? Array(repeating: 0x00, count: 50)
         if data == nil {
-            Data[0] = 0xA2
+            tempData[0] = 0xA2
         }
 
-        if Data[0] != 0xA2 {
+        if tempData[0] != 0xA2 {
             throw ArgumentError.invalid("Output reports must start with a 0xA2 byte!")
         }
-        self.data = Data
+        self.data = tempData
     }
 
     public func getOutputReportId() -> OutputReportID {
         return OutputReportID(rawValue: data[1])!
     }
 
-    public func setOutputReportId(_ id: OutputReportID) {
-        data[1] = id.rawValue
+    public func setOutputReportId(_ outputReportId: OutputReportID) {
+        data[1] = outputReportId.rawValue
     }
 
     public func getTimer() -> OutputReportID {
@@ -48,8 +48,8 @@ public class OutputReport: CustomDebugStringConvertible {
         return SubCommand(rawValue: data[11])!
     }
 
-    public func setSubCommand(_ id: SubCommand) {
-        data[11] = id.rawValue
+    public func setSubCommand(_ subCommand: SubCommand) {
+        data[11] = subCommand.rawValue
     }
 
     public func getSubCommandData() -> Bytes? {
@@ -60,10 +60,10 @@ public class OutputReport: CustomDebugStringConvertible {
     }
 
     public func setSubCommandData(_ data: Bytes) {
-        var i = 0
-        for b in data {
-            self.data[12 + i] = b
-            i += 1
+        var index = 0
+        for byte in data {
+            self.data[12 + index] = byte
+            index += 1
         }
     }
 
@@ -72,19 +72,19 @@ public class OutputReport: CustomDebugStringConvertible {
     ///   - offset: start byte of the spi flash to read in [0x00, 0x80000)
     ///   - size: size of data to be read in [0x00, 0x1D]
     public func sub0x10SpiFlashRead(offset: Int, size: Byte) throws {
-        var Offset = offset
+        var tempOffset = offset
         if size > 0x1D {
             throw ArgumentError.invalid("Size read can not exceed \(0x1D)")
         }
-        if Offset + Int(size) > 0x80000 {
+        if tempOffset + Int(size) > 0x80000 {
             throw ArgumentError.invalid("Given address range exceeds max address \(0x80000 - 1)")
         }
         setOutputReportId(OutputReportID.subCommand)
         setSubCommand(SubCommand.spiFlashRead)
         // write offset to data
-        for i in 12 ... 15 {
-            data[i] = Byte(Offset % 0x100)
-            Offset = Offset / 0x100
+        for index in 12 ... 15 {
+            data[index] = Byte(tempOffset % 0x100)
+            tempOffset /= 0x100
         }
         data[16] = size
     }
