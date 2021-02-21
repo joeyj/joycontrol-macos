@@ -22,53 +22,13 @@ struct StickCalibration: CustomDebugStringConvertible {
             "vMaxBelowCenter:\(vMaxBelowCenter)"
     }
 
-    init(_ hCenter: Byte, _ vCenter: Byte, _ hMaxAboveCenter: Byte, _ vMaxAboveCenter: Byte, _ hMaxBelowCenter: Byte, _ vMaxBelowCenter: Byte) {
-        self.hCenter = hCenter
-        self.vCenter = vCenter
-        self.hMaxAboveCenter = hMaxAboveCenter
-        self.vMaxAboveCenter = vMaxAboveCenter
-        self.hMaxBelowCenter = hMaxBelowCenter
-        self.vMaxBelowCenter = vMaxBelowCenter
-    }
-}
-
-enum LeftStickCalibration {
-    static func fromBytes(_ bytesLength9: Bytes) -> StickCalibration {
-        let hMaxAboveCenter = Byte(UInt16(bytesLength9[1] << 8) & 0xF00 | UInt16(bytesLength9[0]))
-        let vMaxAboveCenter = Byte((bytesLength9[2] << 4) | (bytesLength9[1] >> 4))
-        let hCenter = Byte(UInt16(bytesLength9[4] << 8) & 0xF00 | UInt16(bytesLength9[3]))
-        let vCenter = Byte((bytesLength9[5] << 4) | (bytesLength9[4] >> 4))
-        let hMaxBelowCenter = Byte(UInt16(bytesLength9[7] << 8) & 0xF00 | UInt16(bytesLength9[6]))
-        let vMaxBelowCenter = Byte((bytesLength9[8] << 4) | (bytesLength9[7] >> 4))
-
-        return StickCalibration(
-            hCenter,
-            vCenter,
-            hMaxAboveCenter,
-            vMaxAboveCenter,
-            hMaxBelowCenter,
-            vMaxBelowCenter
-        )
-    }
-}
-
-enum RightStickCalibration {
-    static func fromBytes(_ bytesLength9: Bytes) -> StickCalibration {
-        let hMaxAboveCenter = Byte(UInt16(bytesLength9[1] << 8) & 0xF00 | UInt16(bytesLength9[0]))
-        let vMaxAboveCenter = Byte((bytesLength9[2] << 4) | (bytesLength9[1] >> 4))
-        let hCenter = Byte(UInt16(bytesLength9[4] << 8) & 0xF00 | UInt16(bytesLength9[3]))
-        let vCenter = Byte((bytesLength9[5] << 4) | (bytesLength9[4] >> 4))
-        let hMaxBelowCenter = Byte(UInt16(bytesLength9[7] << 8) & 0xF00 | UInt16(bytesLength9[6]))
-        let vMaxBelowCenter = Byte((bytesLength9[8] << 4) | (bytesLength9[7] >> 4))
-
-        return StickCalibration(
-            hCenter,
-            vCenter,
-            hMaxAboveCenter,
-            vMaxAboveCenter,
-            hMaxBelowCenter,
-            vMaxBelowCenter
-        )
+    init(_ bytesLength9: Bytes) {
+        hMaxAboveCenter = Byte(UInt16(bytesLength9[1] << 8) & 0xF00 | UInt16(bytesLength9[0]))
+        vMaxAboveCenter = Byte((bytesLength9[2] << 4) | (bytesLength9[1] >> 4))
+        hCenter = Byte(UInt16(bytesLength9[4] << 8) & 0xF00 | UInt16(bytesLength9[3]))
+        vCenter = Byte((bytesLength9[5] << 4) | (bytesLength9[4] >> 4))
+        hMaxBelowCenter = Byte(UInt16(bytesLength9[7] << 8) & 0xF00 | UInt16(bytesLength9[6]))
+        vMaxBelowCenter = Byte((bytesLength9[8] << 4) | (bytesLength9[7] >> 4))
     }
 }
 
@@ -183,7 +143,7 @@ struct ControllerState {
         if [Controller.proController, Controller.joyconL].contains(controller) {
             let calibrationData = spiFlash.getUserLStickCalibration() ?? spiFlash.getFactoryLStickCalibration()
 
-            let calibration = LeftStickCalibration.fromBytes(calibrationData)
+            let calibration = StickCalibration(calibrationData)
 
             leftStickState = try! StickState(calibration: calibration)
             try! leftStickState!.setCenter()
@@ -194,7 +154,7 @@ struct ControllerState {
         if [Controller.proController, Controller.joyconR].contains(controller) {
             let calibrationData = spiFlash.getUserRStickCalibration() ?? spiFlash.getFactoryRStickCalibration()
 
-            let calibration = RightStickCalibration.fromBytes(calibrationData)
+            let calibration = StickCalibration(calibrationData)
 
             rightStickState = try! StickState(calibration: calibration)
             try! rightStickState!.setCenter()
