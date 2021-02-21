@@ -16,42 +16,46 @@ import os.log
 ///    1        Y         X         B         A         SR        SL        R         ZR
 ///    2        Minus     Plus      R Stick   L Stick   Home      Capture
 ///    3        Down      Up        Right     Left      SR        SL        L         ZL
-public class ButtonState {
+class ButtonState {
     private static let byte1Index = 0
     private static let byte2Index = 1
     private static let byte3Index = 2
     private static let controllerToButtons: [Controller: [ControllerButton]] = [
-        Controller.proController: [ControllerButton.y, ControllerButton.x,
-                                   ControllerButton.b, ControllerButton.a,
-                                   ControllerButton.r, ControllerButton.zr,
-                                   ControllerButton.minus, ControllerButton.plus,
-                                   ControllerButton.rightStick, ControllerButton.leftStick,
-                                   ControllerButton.home, ControllerButton.capture,
-                                   ControllerButton.down, ControllerButton.up,
-                                   ControllerButton.right, ControllerButton.left,
-                                   ControllerButton.l, ControllerButton.zl],
-        Controller.joyconR: [ControllerButton.y, ControllerButton.x,
-                             ControllerButton.b, ControllerButton.a,
-                             ControllerButton.sr, ControllerButton.sl,
-                             ControllerButton.r, ControllerButton.zr,
-                             ControllerButton.plus, ControllerButton.rightStick,
-                             ControllerButton.home],
-        Controller.joyconL: [ControllerButton.minus, ControllerButton.leftStick,
-                             ControllerButton.capture, ControllerButton.down,
-                             ControllerButton.up, ControllerButton.right,
-                             ControllerButton.left, ControllerButton.sr,
-                             ControllerButton.sl, ControllerButton.l,
-                             ControllerButton.zl]
+        Controller.proController: [
+            ControllerButton.y, ControllerButton.x,
+            ControllerButton.b, ControllerButton.a,
+            ControllerButton.r, ControllerButton.zr,
+            ControllerButton.minus, ControllerButton.plus,
+            ControllerButton.rightStick, ControllerButton.leftStick,
+            ControllerButton.home, ControllerButton.capture,
+            ControllerButton.down, ControllerButton.up,
+            ControllerButton.right, ControllerButton.left,
+            ControllerButton.l, ControllerButton.zl
+        ],
+        Controller.joyconR: [
+            ControllerButton.y, ControllerButton.x,
+            ControllerButton.b, ControllerButton.a,
+            ControllerButton.sr, ControllerButton.sl,
+            ControllerButton.r, ControllerButton.zr,
+            ControllerButton.plus, ControllerButton.rightStick,
+            ControllerButton.home
+        ],
+        Controller.joyconL: [
+            ControllerButton.minus, ControllerButton.leftStick,
+            ControllerButton.capture, ControllerButton.down,
+            ControllerButton.up, ControllerButton.right,
+            ControllerButton.left, ControllerButton.sr,
+            ControllerButton.sl, ControllerButton.l,
+            ControllerButton.zl
+        ]
     ]
-    public var controller: Controller
-    private var logger = Logger()
-    private var availableButtons: [ControllerButton] = []
-    private var buttonStates: [Byte] = [0, 0, 0]
+    let controller: Controller
+    private let logger = Logger()
+    private let availableButtons: [ControllerButton]
+    private var buttonStates: Bytes = [0, 0, 0]
     private var buttonFuncs: [ControllerButton: ((Bool) -> Void, () -> Bool)] = Dictionary()
-    public init(_ controller: Controller) {
+    init(_ controller: Controller) {
         self.controller = controller
-
-        reset()
 
         availableButtons = ButtonState.controllerToButtons[controller]!
 
@@ -108,12 +112,12 @@ public class ButtonState {
         }
 
         func getter() -> Bool {
-            return Utils.getBit(buttonStates[byte], bit)
+            Utils.getBit(buttonStates[byte], bit)
         }
         return (setter, getter)
     }
 
-    public func setButton(_ button: ControllerButton, pushed: Bool = true) throws {
+    func setButton(_ button: ControllerButton, pushed: Bool = true) throws {
         logger.info(#function)
         if !availableButtons.contains(button) {
             throw ApplicationError.general("Given button \"\(button)\" is not available to \(controller.name).")
@@ -121,7 +125,7 @@ public class ButtonState {
         buttonFuncs[button]!.0(pushed)
     }
 
-    public func getButton(_ button: ControllerButton) throws -> Bool {
+    func getButton(_ button: ControllerButton) throws -> Bool {
         logger.info(#function)
         if !availableButtons.contains(button) {
             throw ApplicationError.general("Given button \"\(button)\" is not available to \(controller.name).")
@@ -129,11 +133,11 @@ public class ButtonState {
         return buttonFuncs[button]!.1()
     }
 
-    public func getAvailableButtons() -> [ControllerButton] {
-        return availableButtons
+    func getAvailableButtons() -> [ControllerButton] {
+        availableButtons
     }
 
-    public func bytes() -> Bytes {
+    func bytes() -> Bytes {
         logger.info(#function)
         let byte1Value = buttonStates[ButtonState.byte1Index]
         let byte2Value = buttonStates[ButtonState.byte2Index]
@@ -142,16 +146,18 @@ public class ButtonState {
         return [byte1Value, byte2Value, byte3Value]
     }
 
-    public func reset() {
+    func reset() {
         for index in 0 ... buttonStates.count - 1 {
             buttonStates[index] = 0
         }
     }
+
+    deinit {}
 }
 
 /// Set given buttons in the controller state to the pressed down state and wait till send.
-public func buttonPress(_ controllerState: ControllerState, _ buttons: [ControllerButton]) throws {
-    if buttons.count == 0 {
+func buttonPress(_ controllerState: ControllerState, _ buttons: [ControllerButton]) throws {
+    if buttons.isEmpty {
         throw ApplicationError.general("No Buttons were given.")
     }
 
@@ -167,8 +173,8 @@ public func buttonPress(_ controllerState: ControllerState, _ buttons: [Controll
 }
 
 /// Set given buttons in the controller state to the unpressed state and wait till send.
-public func buttonRelease(_ controllerState: ControllerState, _ buttons: [ControllerButton]) throws {
-    if buttons.count == 0 {
+func buttonRelease(_ controllerState: ControllerState, _ buttons: [ControllerButton]) throws {
+    if buttons.isEmpty {
         throw ApplicationError.general("No Buttons were given.")
     }
 
@@ -186,7 +192,7 @@ public func buttonRelease(_ controllerState: ControllerState, _ buttons: [Contro
 /// Shortly push the given buttons. Wait until the controller state is sent.
 /// - Parameters:
 ///   - sec: Seconds to wait before releasing the button, default: 0.1
-public func buttonPush(controllerState: ControllerState, buttons: [ControllerButton], sec: Double = 0.1) {
+func buttonPush(controllerState: ControllerState, buttons: [ControllerButton], sec: Double = 0.1) {
     try! buttonPress(controllerState, buttons)
     DispatchQueue.main.asyncAfter(deadline: .now() + sec) {
         try! buttonRelease(controllerState, buttons)

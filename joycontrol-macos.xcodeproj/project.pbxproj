@@ -8,23 +8,25 @@
 
 /* Begin PBXBuildFile section */
 		F70A82ED25DB4F4B00E63A8A /* NintendoSwitchBluetoothManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F70A82EC25DB4F4B00E63A8A /* NintendoSwitchBluetoothManager.swift */; };
-		F70A82F225DB4FFD00E63A8A /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F70A82F125DB4FFD00E63A8A /* AppDelegate.swift */; };
-		F738726225D3A2C200279B82 /* joycontrolMacosApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F738726125D3A2C200279B82 /* joycontrolMacosApp.swift */; };
+		F738726225D3A2C200279B82 /* JoycontrolMacosApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F738726125D3A2C200279B82 /* JoycontrolMacosApp.swift */; };
 		F738726625D3A2C300279B82 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F738726525D3A2C300279B82 /* Assets.xcassets */; };
 		F738726925D3A2C300279B82 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F738726825D3A2C300279B82 /* Preview Assets.xcassets */; };
 		F738727525D3A2C300279B82 /* joycontrol_macosTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F738727425D3A2C300279B82 /* joycontrol_macosTests.swift */; };
 		F738728025D3A2C300279B82 /* joycontrol_macosUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F738727F25D3A2C300279B82 /* joycontrol_macosUITests.swift */; };
-		F73872C525D3A3CB00279B82 /* HCIWriteExtendedInquiryResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = F73872BC25D3A3CB00279B82 /* HCIWriteExtendedInquiryResponse.swift */; };
-		F73872C625D3A3CB00279B82 /* Common.swift in Sources */ = {isa = PBXBuildFile; fileRef = F73872BD25D3A3CB00279B82 /* Common.swift */; };
+		F73872C525D3A3CB00279B82 /* HCIWriteExtendedInquiryResponseData.swift in Sources */ = {isa = PBXBuildFile; fileRef = F73872BC25D3A3CB00279B82 /* HCIWriteExtendedInquiryResponseData.swift */; };
+		F73872C625D3A3CB00279B82 /* Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = F73872BD25D3A3CB00279B82 /* Utils.swift */; };
 		F73872C725D3A3CB00279B82 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F73872BE25D3A3CB00279B82 /* ContentView.swift */; };
 		F73872C825D3A3CB00279B82 /* InputReport.swift in Sources */ = {isa = PBXBuildFile; fileRef = F73872BF25D3A3CB00279B82 /* InputReport.swift */; };
 		F73872C925D3A3CB00279B82 /* ControllerState.swift in Sources */ = {isa = PBXBuildFile; fileRef = F73872C025D3A3CB00279B82 /* ControllerState.swift */; };
 		F73872CA25D3A3CB00279B82 /* OutputReport.swift in Sources */ = {isa = PBXBuildFile; fileRef = F73872C125D3A3CB00279B82 /* OutputReport.swift */; };
 		F73872CB25D3A3CB00279B82 /* FlashMemory.swift in Sources */ = {isa = PBXBuildFile; fileRef = F73872C225D3A3CB00279B82 /* FlashMemory.swift */; };
 		F73872CC25D3A3CB00279B82 /* NintendoSwitchControllerSDP.plist in Resources */ = {isa = PBXBuildFile; fileRef = F73872C325D3A3CB00279B82 /* NintendoSwitchControllerSDP.plist */; };
-		F73872CD25D3A3CB00279B82 /* Protocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = F73872C425D3A3CB00279B82 /* Protocol.swift */; };
+		F73872CD25D3A3CB00279B82 /* ControllerProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = F73872C425D3A3CB00279B82 /* ControllerProtocol.swift */; };
 		F73872D325D3A40400279B82 /* BluetoothDarwin in Frameworks */ = {isa = PBXBuildFile; productRef = F73872D225D3A40400279B82 /* BluetoothDarwin */; };
 		F77BE2A225E21FC8006E1669 /* ButtonState.swift in Sources */ = {isa = PBXBuildFile; fileRef = F77BE2A125E21FC8006E1669 /* ButtonState.swift */; };
+		F77BE2A925E2C1D4006E1669 /* .swiftlint.yml in Resources */ = {isa = PBXBuildFile; fileRef = F77BE2A625E2C1D4006E1669 /* .swiftlint.yml */; };
+		F77BE2AA25E2C1D4006E1669 /* .swiftformat in Resources */ = {isa = PBXBuildFile; fileRef = F77BE2A725E2C1D4006E1669 /* .swiftformat */; };
+		F77BE2AB25E2C1D4006E1669 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = F77BE2A825E2C1D4006E1669 /* README.md */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -46,11 +48,10 @@
 
 /* Begin PBXFileReference section */
 		F70A82EC25DB4F4B00E63A8A /* NintendoSwitchBluetoothManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NintendoSwitchBluetoothManager.swift; sourceTree = "<group>"; };
-		F70A82F125DB4FFD00E63A8A /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		F71B106725D4E761008BD7E2 /* IOKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOKit.framework; path = System/Library/Frameworks/IOKit.framework; sourceTree = SDKROOT; };
 		F71B106F25D5CACB008BD7E2 /* A */ = {isa = PBXFileReference; lastKnownFileType = folder; name = A; path = ../../../../System/Library/Frameworks/IOBluetooth.framework/Versions/A; sourceTree = "<group>"; };
 		F738725E25D3A2C200279B82 /* joycontrol-macos.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "joycontrol-macos.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		F738726125D3A2C200279B82 /* joycontrolMacosApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = joycontrolMacosApp.swift; sourceTree = "<group>"; };
+		F738726125D3A2C200279B82 /* JoycontrolMacosApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JoycontrolMacosApp.swift; sourceTree = "<group>"; };
 		F738726525D3A2C300279B82 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		F738726825D3A2C300279B82 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		F738726A25D3A2C300279B82 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -61,16 +62,19 @@
 		F738727B25D3A2C300279B82 /* joycontrol-macosUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "joycontrol-macosUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		F738727F25D3A2C300279B82 /* joycontrol_macosUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = joycontrol_macosUITests.swift; sourceTree = "<group>"; };
 		F738728125D3A2C300279B82 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		F73872BC25D3A3CB00279B82 /* HCIWriteExtendedInquiryResponse.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HCIWriteExtendedInquiryResponse.swift; sourceTree = "<group>"; };
-		F73872BD25D3A3CB00279B82 /* Common.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Common.swift; sourceTree = "<group>"; };
+		F73872BC25D3A3CB00279B82 /* HCIWriteExtendedInquiryResponseData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HCIWriteExtendedInquiryResponseData.swift; sourceTree = "<group>"; };
+		F73872BD25D3A3CB00279B82 /* Utils.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Utils.swift; sourceTree = "<group>"; };
 		F73872BE25D3A3CB00279B82 /* ContentView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		F73872BF25D3A3CB00279B82 /* InputReport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InputReport.swift; sourceTree = "<group>"; };
 		F73872C025D3A3CB00279B82 /* ControllerState.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ControllerState.swift; sourceTree = "<group>"; };
 		F73872C125D3A3CB00279B82 /* OutputReport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OutputReport.swift; sourceTree = "<group>"; };
 		F73872C225D3A3CB00279B82 /* FlashMemory.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FlashMemory.swift; sourceTree = "<group>"; };
 		F73872C325D3A3CB00279B82 /* NintendoSwitchControllerSDP.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = NintendoSwitchControllerSDP.plist; sourceTree = "<group>"; };
-		F73872C425D3A3CB00279B82 /* Protocol.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Protocol.swift; sourceTree = "<group>"; };
+		F73872C425D3A3CB00279B82 /* ControllerProtocol.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ControllerProtocol.swift; sourceTree = "<group>"; };
 		F77BE2A125E21FC8006E1669 /* ButtonState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ButtonState.swift; sourceTree = "<group>"; };
+		F77BE2A625E2C1D4006E1669 /* .swiftlint.yml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.yaml; path = .swiftlint.yml; sourceTree = "<group>"; };
+		F77BE2A725E2C1D4006E1669 /* .swiftformat */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = .swiftformat; sourceTree = "<group>"; };
+		F77BE2A825E2C1D4006E1669 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -111,6 +115,9 @@
 		F738725525D3A2C200279B82 = {
 			isa = PBXGroup;
 			children = (
+				F77BE2A725E2C1D4006E1669 /* .swiftformat */,
+				F77BE2A625E2C1D4006E1669 /* .swiftlint.yml */,
+				F77BE2A825E2C1D4006E1669 /* README.md */,
 				F738726025D3A2C200279B82 /* joycontrol-macos */,
 				F738727325D3A2C300279B82 /* joycontrol-macosTests */,
 				F738727E25D3A2C300279B82 /* joycontrol-macosUITests */,
@@ -132,22 +139,21 @@
 		F738726025D3A2C200279B82 /* joycontrol-macos */ = {
 			isa = PBXGroup;
 			children = (
-				F73872BD25D3A3CB00279B82 /* Common.swift */,
+				F73872BD25D3A3CB00279B82 /* Utils.swift */,
 				F73872BE25D3A3CB00279B82 /* ContentView.swift */,
 				F73872C025D3A3CB00279B82 /* ControllerState.swift */,
 				F73872C225D3A3CB00279B82 /* FlashMemory.swift */,
-				F73872BC25D3A3CB00279B82 /* HCIWriteExtendedInquiryResponse.swift */,
+				F73872BC25D3A3CB00279B82 /* HCIWriteExtendedInquiryResponseData.swift */,
 				F73872BF25D3A3CB00279B82 /* InputReport.swift */,
 				F73872C325D3A3CB00279B82 /* NintendoSwitchControllerSDP.plist */,
 				F73872C125D3A3CB00279B82 /* OutputReport.swift */,
-				F73872C425D3A3CB00279B82 /* Protocol.swift */,
-				F738726125D3A2C200279B82 /* joycontrolMacosApp.swift */,
+				F73872C425D3A3CB00279B82 /* ControllerProtocol.swift */,
+				F738726125D3A2C200279B82 /* JoycontrolMacosApp.swift */,
 				F738726525D3A2C300279B82 /* Assets.xcassets */,
 				F738726A25D3A2C300279B82 /* Info.plist */,
 				F738726B25D3A2C300279B82 /* joycontrol_macos.entitlements */,
 				F738726725D3A2C300279B82 /* Preview Content */,
 				F70A82EC25DB4F4B00E63A8A /* NintendoSwitchBluetoothManager.swift */,
-				F70A82F125DB4FFD00E63A8A /* AppDelegate.swift */,
 				F77BE2A125E21FC8006E1669 /* ButtonState.swift */,
 			);
 			path = "joycontrol-macos";
@@ -289,6 +295,9 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F77BE2AB25E2C1D4006E1669 /* README.md in Resources */,
+				F77BE2AA25E2C1D4006E1669 /* .swiftformat in Resources */,
+				F77BE2A925E2C1D4006E1669 /* .swiftlint.yml in Resources */,
 				F73872CC25D3A3CB00279B82 /* NintendoSwitchControllerSDP.plist in Resources */,
 				F738726925D3A2C300279B82 /* Preview Assets.xcassets in Resources */,
 				F738726625D3A2C300279B82 /* Assets.xcassets in Resources */,
@@ -338,18 +347,17 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F70A82F225DB4FFD00E63A8A /* AppDelegate.swift in Sources */,
-				F73872C525D3A3CB00279B82 /* HCIWriteExtendedInquiryResponse.swift in Sources */,
+				F73872C525D3A3CB00279B82 /* HCIWriteExtendedInquiryResponseData.swift in Sources */,
 				F73872C925D3A3CB00279B82 /* ControllerState.swift in Sources */,
-				F73872C625D3A3CB00279B82 /* Common.swift in Sources */,
+				F73872C625D3A3CB00279B82 /* Utils.swift in Sources */,
 				F73872CB25D3A3CB00279B82 /* FlashMemory.swift in Sources */,
 				F77BE2A225E21FC8006E1669 /* ButtonState.swift in Sources */,
 				F70A82ED25DB4F4B00E63A8A /* NintendoSwitchBluetoothManager.swift in Sources */,
 				F73872CA25D3A3CB00279B82 /* OutputReport.swift in Sources */,
-				F73872CD25D3A3CB00279B82 /* Protocol.swift in Sources */,
+				F73872CD25D3A3CB00279B82 /* ControllerProtocol.swift in Sources */,
 				F73872C825D3A3CB00279B82 /* InputReport.swift in Sources */,
 				F73872C725D3A3CB00279B82 /* ContentView.swift in Sources */,
-				F738726225D3A2C200279B82 /* joycontrolMacosApp.swift in Sources */,
+				F738726225D3A2C200279B82 /* JoycontrolMacosApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

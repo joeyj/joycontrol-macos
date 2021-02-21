@@ -8,14 +8,14 @@ import Bluetooth
 import Foundation
 import IOBluetooth
 
-public typealias Byte = UInt8
-public typealias Bytes = [Byte]
+typealias Byte = UInt8
+typealias Bytes = [Byte]
 
-public enum Controller: Byte {
+enum Controller: Byte {
     case joyconL = 0x01,
          joyconR = 0x02,
          proController = 0x03
-    public var name: String {
+    var name: String {
         switch self {
         case Controller.joyconL:
             return "Joy-Con (L)"
@@ -27,25 +27,15 @@ public enum Controller: Byte {
     }
 }
 
-public enum Utils {
-    public static func getBit(_ value: Byte, _ bit: Byte) -> Bool {
-        return (value >> bit & 1) != 0
-    }
-
-    public static func flipBit(_ value: Byte, _ bit: Byte) -> Byte {
-        return value ^ (1 << bit)
-    }
-}
-
-public enum ArgumentError: Error {
+enum ArgumentError: Error {
     case invalid(_ message: String)
 }
 
-public enum ApplicationError: Error {
+enum ApplicationError: Error {
     case general(_ message: String)
 }
 
-public enum SubCommand: Byte {
+enum SubCommand: Byte {
     case none = 0,
          requestDeviceInfo = 0x02,
          setInputReportMode = 0x03,
@@ -60,19 +50,19 @@ public enum SubCommand: Byte {
          enableVibration = 0x48
 }
 
-public enum OutputReportID: Byte {
+enum OutputReportID: Byte {
     case subCommand = 0x01,
          rumbleOnly = 0x10,
          requestIrNfcMcu = 0x11
 }
 
-public enum InputReportId: Byte {
+enum InputReportId: Byte {
     case standard = 0x21,
          imu = 0x30,
          setNfcData = 0x31
 }
 
-public enum ControllerButton: String {
+enum ControllerButton: String {
     // swiftlint:disable identifier_name
     case y,
          x,
@@ -95,4 +85,14 @@ public enum ControllerButton: String {
          sr,
          sl
     // swiftlint:enable identifier_name
+}
+
+enum Utils {
+    static func getBit(_ value: Byte, _ bit: Byte) -> Bool {
+        (value >> bit & 1) != 0
+    }
+
+    static func flipBit(_ value: Byte, _ bit: Byte) -> Byte {
+        value ^ (1 << bit)
+    }
 }

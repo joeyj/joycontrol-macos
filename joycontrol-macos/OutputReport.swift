@@ -6,13 +6,17 @@
 //
 
 import Foundation
-public class OutputReport: CustomDebugStringConvertible {
+class OutputReport: CustomDebugStringConvertible {
     private var data: Bytes
-    public init(_ data: Bytes? = nil) throws {
-        var tempData = data ?? Array(repeating: 0x00, count: 50)
-        if data == nil {
-            tempData[0] = 0xA2
-        }
+
+    var debugDescription: String {
+        let (info, bytes) = (getOutputReportId() == OutputReportID.subCommand) ? (String(getSubCommand().rawValue), data.debugDescription) : ("", "")
+
+        return "Output \(getOutputReportId()) \(info)\n\(bytes)"
+    }
+
+    init(_ data: Bytes? = nil) throws {
+        let tempData = data ?? ([0xA2] + Bytes(repeating: 0x00, count: 49))
 
         if tempData[0] != 0xA2 {
             throw ArgumentError.invalid("Output reports must start with a 0xA2 byte!")
@@ -20,50 +24,48 @@ public class OutputReport: CustomDebugStringConvertible {
         self.data = tempData
     }
 
-    public func getOutputReportId() -> OutputReportID {
-        return OutputReportID(rawValue: data[1])!
+    func getOutputReportId() -> OutputReportID {
+        OutputReportID(rawValue: data[1])!
     }
 
-    public func setOutputReportId(_ outputReportId: OutputReportID) {
+    func setOutputReportId(_ outputReportId: OutputReportID) {
         data[1] = outputReportId.rawValue
     }
 
-    public func getTimer() -> OutputReportID {
-        return OutputReportID(rawValue: data[2])!
+    func getTimer() -> OutputReportID {
+        OutputReportID(rawValue: data[2])!
     }
 
     /// - Parameter timer: 0x0-0xF
-    public func setTimer(_ timer: Byte) {
+    func setTimer(_ timer: Byte) {
         data[2] = (timer % 0x10)
     }
 
-    public func getRumbleData() -> Bytes {
-        return Array(data[3 ... 10])
+    func getRumbleData() -> Bytes {
+        Array(data[3 ... 10])
     }
 
-    public func getSubCommand() -> SubCommand {
+    func getSubCommand() -> SubCommand {
         if data.count < 12 {
             return SubCommand.none
         }
         return SubCommand(rawValue: data[11])!
     }
 
-    public func setSubCommand(_ subCommand: SubCommand) {
+    func setSubCommand(_ subCommand: SubCommand) {
         data[11] = subCommand.rawValue
     }
 
-    public func getSubCommandData() -> Bytes? {
+    func getSubCommandData() -> Bytes? {
         if data.count < 13 {
             return nil
         }
         return Array(data[12...])
     }
 
-    public func setSubCommandData(_ data: Bytes) {
-        var index = 0
-        for byte in data {
+    func setSubCommandData(_ data: Bytes) {
+        for (index, byte) in data.enumerated() {
             self.data[12 + index] = byte
-            index += 1
         }
     }
 
@@ -71,7 +73,7 @@ public class OutputReport: CustomDebugStringConvertible {
     /// - Parameters:
     ///   - offset: start byte of the spi flash to read in [0x00, 0x80000)
     ///   - size: size of data to be read in [0x00, 0x1D]
-    public func sub0x10SpiFlashRead(offset: Int, size: Byte) throws {
+    func sub0x10SpiFlashRead(offset: Int, size: Byte) throws {
         var tempOffset = offset
         if size > 0x1D {
             throw ArgumentError.invalid("Size read can not exceed \(0x1D)")
@@ -89,13 +91,9 @@ public class OutputReport: CustomDebugStringConvertible {
         data[16] = size
     }
 
-    public func bytes() -> Bytes {
-        return data
+    func bytes() -> Bytes {
+        data
     }
 
-    public var debugDescription: String {
-        let (info, bytes) = (getOutputReportId() == OutputReportID.subCommand) ? (String(getSubCommand().rawValue), data.debugDescription) : ("", "")
-
-        return "Output \(getOutputReportId()) \(info)\n\(bytes)"
-    }
+    deinit {}
 }

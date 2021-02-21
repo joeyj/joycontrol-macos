@@ -10,10 +10,10 @@ import os.log
 import SwiftUI
 
 struct ContentView: View {
-    var logger = Logger()
-    @State public var toggleAllowPairing: Bool
+    let logger = Logger()
+    @State var toggleAllowPairing: Bool
     @AppStorage("deviceAddress") private var deviceAddress: String = ""
-    @ObservedObject public var bluetoothManager = NintendoSwitchBluetoothManager.shared
+    @ObservedObject var bluetoothManager = NintendoSwitchBluetoothManager.shared
     var body: some View {
         VStack(alignment: .center, spacing: nil, content: {
             Toggle("Allow Pairing", isOn: $toggleAllowPairing)
@@ -69,14 +69,14 @@ struct ContentView: View {
             .padding()
             .toggleStyle(SwitchToggleStyle())
             .onReceive(Just(bluetoothManager), perform: { output in
-                if deviceAddress == "" {
+                if deviceAddress.isEmpty {
                     deviceAddress = output.deviceAddress
                 }
             })
     }
 
     private func controllerButton(_ title: ControllerButton) -> Button<Text> {
-        return Button(title.rawValue, action: {
+        Button(title.rawValue, action: {
             controllerButtonPushed(buttons: [title])
         })
     }

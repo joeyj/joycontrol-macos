@@ -10,26 +10,30 @@ import Foundation
 import IOBluetooth
 import os.log
 
-public protocol ControllerProtocolDelgate: class {
+protocol ControllerProtocolDelgate: AnyObject {
     func controllerProtocolConnectionLost()
 }
 
 // swiftlint:disable:next type_body_length
-public class ControllerProtocol {
-    private var logger = Logger()
-    public var controller: Controller
-    public var spiFlash: FlashMemory
-    public var setPlayerLightsSemaphore: DispatchSemaphore
-    public var transport: IOBluetoothL2CAPChannel?
+class ControllerProtocol {
+    private let logger = Logger()
+    let controller: Controller
+    let spiFlash: FlashMemory
+    let setPlayerLightsSemaphore: DispatchSemaphore
+    var transport: IOBluetoothL2CAPChannel?
     private var inputReportTimer: Byte
     private var inputReportMode: InputReportId?
-    private var dataReceived: DispatchSemaphore
-    public var controllerState: ControllerState?
+    private let dataReceived: DispatchSemaphore
+    var controllerState: ControllerState?
     private var inputReportModeTimer: Timer?
     private var hostAddress: BluetoothAddress
     private weak var delegate: ControllerProtocolDelgate?
-    public init(controller: Controller, spiFlash: FlashMemory,
-                hostAddress: BluetoothAddress, delegate: ControllerProtocolDelgate) {
+    init(
+        controller: Controller,
+        spiFlash: FlashMemory,
+        hostAddress: BluetoothAddress,
+        delegate: ControllerProtocolDelgate
+    ) {
         self.controller = controller
         self.spiFlash = spiFlash
 
@@ -50,7 +54,7 @@ public class ControllerProtocol {
 
     /// Waits for the controller state to be sent.
     /// - Throws: ApplicationError.general if the connection was lost.
-    public func sendControllerState() throws {
+    func sendControllerState() throws {
         logger.info(#function)
         if transport == nil {
             throw ApplicationError.general("Transport not registered.")
@@ -62,7 +66,7 @@ public class ControllerProtocol {
     /// Sets timer byte and current button state in the input report and sends it.
     /// Fires sigIsSend event in the controller state afterwards.
     /// - Throws: ationError.general if the connection was lost.
-    public func write(_ inputReport: InputReport) throws {
+    func write(_ inputReport: InputReport) throws {
         logger.info(#function)
         if transport == nil {
             throw ApplicationError.general("Transport not registered.")
@@ -84,12 +88,12 @@ public class ControllerProtocol {
         controllerState!.sendCompleteSemaphore.signal()
     }
 
-    public func connectionMade(_ transport: IOBluetoothL2CAPChannel) {
+    func connectionMade(_ transport: IOBluetoothL2CAPChannel) {
         logger.info(#function)
         self.transport = transport
     }
 
-    public func connectionLost() {
+    func connectionLost() {
         if transport != nil {
             logger.info(#function)
             transport = nil
@@ -99,7 +103,8 @@ public class ControllerProtocol {
         delegate?.controllerProtocolConnectionLost()
     }
 
-    @objc func sendInputReport() throws {
+    @objc
+    func sendInputReport() throws {
         logger.info(#function)
         let inputReport = try! InputReport(nil)
         inputReport.setVibratorInput()
@@ -121,7 +126,7 @@ public class ControllerProtocol {
         try! write(inputReport)
     }
 
-    public func inputReportModeFull() throws {
+    func inputReportModeFull() throws {
         logger.info(#function)
         if inputReportModeTimer != nil {
             logger.info("already in input report mode")
@@ -142,7 +147,7 @@ public class ControllerProtocol {
         }
     }
 
-    public func reportReceived(_ data: Bytes) {
+    func reportReceived(_ data: Bytes) {
         logger.info(#function)
         dataReceived.signal()
 
@@ -169,27 +174,37 @@ public class ControllerProtocol {
         switch subCommand {
         case SubCommand.requestDeviceInfo:
             commandRequestDeviceInfo(subCommandData)
+
         case SubCommand.setShipmentState:
             commandSetShipmentState(subCommandData)
+
         case SubCommand.spiFlashRead:
             commandSpiFlashRead(subCommandData)
+
         case SubCommand.setInputReportMode:
             commandSetInputReportMode(subCommandData) // TODO: when to stop input report mode?
         case SubCommand.triggerButtonsElapsedTime:
             try! commandTriggerButtonsElapsedTime(subCommandData)
+
         case SubCommand.enable6axisSensor:
             commandEnable6axisSensor(subCommandData)
+
         case SubCommand.enableVibration:
             commandEnableVibration(subCommandData)
+
         case SubCommand.setNfcIrMcuConfig:
             commandSetNfcIrMcuConfig(subCommandData)
+
         case SubCommand.setNfcIrMcuState:
             try! commandSetNfcIrMcuState(subCommandData)
+
         case SubCommand.setPlayerLights:
             commandSetPlayerLights(subCommandData)
+
         case SubCommand.setHCIState:
             // assume Nintendo Switch is going to sleep
             connectionLost()
+
         default:
             logger.info("Sub command 0x{subCommand.value:02x} not implemented - ignoring")
         }
@@ -275,10 +290,10 @@ public class ControllerProtocol {
         inputReport.replyToSubCommandId(SubCommand.triggerButtonsElapsedTime)
         // Hack: We assume this command is only used during pairing - Set values so the Switch assigns a player number
         if controller == Controller.proController {
-            try! inputReport.sub0x04TriggerButtonsElapsedTime(LMs: 3000, RMs: 3000)
+            try! inputReport.sub0x04TriggerButtonsElapsedTime(LMs: 3_000, RMs: 3_000)
         } else if [Controller.joyconL, Controller.joyconR].contains(controller) {
             // TODO: What do we do if we want to pair a combined JoyCon?
-            try! inputReport.sub0x04TriggerButtonsElapsedTime(SLMs: 3000, SRMs: 3000)
+            try! inputReport.sub0x04TriggerButtonsElapsedTime(SLMs: 3_000, SRMs: 3_000)
         } else {
             throw ApplicationError.general(String(describing: controller))
         }
@@ -311,9 +326,11 @@ public class ControllerProtocol {
         inputReport.setAck(0xA0)
         inputReport.replyToSubCommandId(SubCommand.setNfcIrMcuConfig)
 
-        let data: Bytes = [1, 0, 255, 0, 8, 0, 27, 1, 0, 0, 0, 0, 0, 0,
-                           0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                           0, 0, 0, 0, 200]
+        let data: Bytes = [
+            1, 0, 255, 0, 8, 0, 27, 1, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 200
+        ]
         for index in 0 ... data.count - 1 {
             inputReport.data[16 + index] = data[index]
         }
@@ -349,4 +366,6 @@ public class ControllerProtocol {
 
         setPlayerLightsSemaphore.signal()
     }
+
+    deinit {}
 }
