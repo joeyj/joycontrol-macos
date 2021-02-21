@@ -35,15 +35,9 @@ struct StickCalibration: CustomDebugStringConvertible {
 class StickState {
     private var hStick: Byte = 0
     private var vStick: Byte = 0
-    private let calibration: StickCalibration?
-    init(horizontal: Byte = 0, vertical: Byte = 0, calibration: StickCalibration? = nil) throws {
+    private let calibration: StickCalibration
+    init(calibration: StickCalibration) throws {
         self.calibration = calibration
-        for val in [horizontal, vertical] {
-            try! validate(val)
-        }
-
-        hStick = horizontal
-        vStick = vertical
     }
 
     private func validate(_ val: Byte) throws {
@@ -108,10 +102,7 @@ class StickState {
     }
 
     func getCalibration() throws -> StickCalibration {
-        if calibration == nil {
-            throw ApplicationError.general("No calibration data available.")
-        }
-        return calibration!
+        calibration
     }
 
     func bytes() -> Bytes {
