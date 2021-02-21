@@ -7,7 +7,12 @@
 
 import Foundation
 
-let kDefaultFlashMemory = Bytes(repeating: 0xFF, count: 0x603C) + [0x00, 0x07, 0x70, 0x00, 0x08, 0x80, 0x00, 0x07, 0x70] + [0x00, 0x08, 0x80, 0x00, 0x07, 0x70, 0x00, 0x07, 0x70] + Bytes(repeating: 0xFF, count: 0x80000 - 0x604E)
+let kFactoryLStickCalibration: Bytes = [0x00, 0x07, 0x70, 0x00, 0x08, 0x80, 0x00, 0x07, 0x70]
+let kFactoryRStickCalibration: Bytes = [0x00, 0x08, 0x80, 0x00, 0x07, 0x70, 0x00, 0x07, 0x70]
+let kDefaultFlashMemory = Bytes(repeating: 0xFF, count: 0x603C) // Blank data is all 0xFF
+    + kFactoryLStickCalibration
+    + kFactoryRStickCalibration
+    + Bytes(repeating: 0xFF, count: 0x80000 - 0x604E)
 
 class FlashMemory {
     let data: Bytes
@@ -15,7 +20,7 @@ class FlashMemory {
     ///   - spiFlashMemoryData: data from a memory dump (can be created using dumpSpiFlash.py).
     ///   - size: size of the memory dump, should be constant
     init(spiFlashMemoryData: Bytes? = nil, size: Int = 0x80000) throws {
-        let tempData = spiFlashMemoryData ?? kDefaultFlashMemory // Blank data is all 0xFF
+        let tempData = spiFlashMemoryData ?? kDefaultFlashMemory
 
         if tempData.count != size {
             throw ApplicationError.general("Given data size {len(spiFlashMemoryData)} does not match size {size}.")
