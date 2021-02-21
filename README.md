@@ -19,7 +19,7 @@ sudo launchctl stop com.apple.bluetoothd && launchctl start com.apple.bluetoothd
 
 ## TODO/Known Issues
 
-- [x] __UPDATE:__ This appers to only happen on the Change Grip/Order screen. Once the initial connection is made there, exit the menu and then click ```Connect``` in the UI. ~~Bluetooth controller appears to initiate a disconnect after everything is running smoothly. It's still unclear why the following happens (log captured with Packet Logger from Xcode Tools):~~
+- [x] __UPDATE:__ This appears to only happen on the Change Grip/Order screen. Once the initial connection is made there, exit the menu and then click ```Connect``` in the UI. ~~Bluetooth controller appears to initiate a disconnect after everything is running smoothly. It's still unclear why the following happens (log captured with Packet Logger from Xcode Tools):~~
 
 ```
 Feb 09 15:30:38.153
