@@ -75,12 +75,12 @@ struct ContentView: View {
             }
         })
     }
-    func controllerButton(_ title: ControllerButton) -> Button<Text> {
+    private func controllerButton(_ title: ControllerButton) -> Button<Text> {
         return Button(title.rawValue, action: {
             controllerButtonPushed(buttons: [title])
         })
     }
-    func controllerButtonPushed(buttons: [ControllerButton]) {
+    private func controllerButtonPushed(buttons: [ControllerButton]) {
         guard bluetoothManager.controllerProtocol != nil else {
             logger.info("controllerProtocol not initialized")
             return
@@ -89,7 +89,7 @@ struct ContentView: View {
         logger.info("\(String(describing: buttons))")
         buttonPush(controllerState: bluetoothManager.controllerProtocol!.controllerState!,buttons:buttons)
     }
-    func setAllowPairing(_ allowPairing: Bool) {
+    private func setAllowPairing(_ allowPairing: Bool) {
         if (allowPairing) {
             bluetoothManager.startScan()
         } else {

@@ -57,7 +57,7 @@ public class NintendoSwitchBluetoothManager: NSObject, IOBluetoothL2CAPChannelDe
         return readScanEnable > 0
     }
     
-    func ensureBluetoothControllerConfigured() {
+    private func ensureBluetoothControllerConfigured() {
         let host = HostController.default!
         let deviceName = "Pro Controller"
         try! host.writeLocalName(deviceName)
@@ -87,15 +87,15 @@ public class NintendoSwitchBluetoothManager: NSObject, IOBluetoothL2CAPChannelDe
         logger.info("\(self.serviceRecord!.debugDescription)")
     }
     
-    func onBluetoothPoweredOn() {
+    private func onBluetoothPoweredOn() {
         ensureBluetoothControllerConfigured()
         addSdpRecord()
         registerChannelOpenDelegate()
     }
-    func onBluetoothPoweredOff() {
+    private func onBluetoothPoweredOff() {
         
     }
-    func registerChannelOpenDelegate(){
+    private func registerChannelOpenDelegate(){
         guard IOBluetoothL2CAPChannel
                 .register(forChannelOpenNotifications: self,
                           selector: #selector(newL2CAPChannelOpened), withPSM: NintendoSwitchBluetoothManager.controlPsm, direction: kIOBluetoothUserNotificationChannelDirectionIncoming) != nil else
@@ -112,7 +112,7 @@ public class NintendoSwitchBluetoothManager: NSObject, IOBluetoothL2CAPChannelDe
         }
     }
     
-    func connectNintendoSwitch(_ address: String) {
+    public func connectNintendoSwitch(_ address: String) {
         logger.debug(#function)
         DispatchQueue.main.async {
             let nintendoSwitch = IOBluetoothDevice.init(addressString: address)!
@@ -121,7 +121,7 @@ public class NintendoSwitchBluetoothManager: NSObject, IOBluetoothL2CAPChannelDe
             self.openL2CAPChannelOrFail(nintendoSwitch, NintendoSwitchBluetoothManager.interruptPsm, &self.interruptChannelOutgoing)
         }
     }
-    func disconnectNintendoSwitch(_ address: String) {
+    public func disconnectNintendoSwitch(_ address: String) {
         logger.debug(#function)
         DispatchQueue.main.async { [self] in
             let nintendoSwitch = IOBluetoothDevice.init(addressString: address)!
@@ -136,11 +136,11 @@ public class NintendoSwitchBluetoothManager: NSObject, IOBluetoothL2CAPChannelDe
             nintendoSwitch.closeConnection()
         }
     }
-    func cleanup() {
+    public func cleanup() {
         logger.info("Removing service record")
         serviceRecord?.remove()
     }
-    func openL2CAPChannelOrFail(_ device: IOBluetoothDevice, _ psm: BluetoothL2CAPPSM, _ channel: AutoreleasingUnsafeMutablePointer<IOBluetoothL2CAPChannel?>!) {
+    private func openL2CAPChannelOrFail(_ device: IOBluetoothDevice, _ psm: BluetoothL2CAPPSM, _ channel: AutoreleasingUnsafeMutablePointer<IOBluetoothL2CAPChannel?>!) {
         let result = device.openL2CAPChannelSync(channel, withPSM: psm, delegate: self)
         guard result == kIOReturnSuccess else {
             fatalError("Failed to open l2cap channel PSM: \(psm) result: \(result)")
@@ -152,7 +152,7 @@ public class NintendoSwitchBluetoothManager: NSObject, IOBluetoothL2CAPChannelDe
         channel.setDelegate(self)
     }
     
-    func getDataFromChannel(data dataPointer: UnsafeMutableRawPointer!, length dataLength: Int) -> Bytes {
+    private func getDataFromChannel(data dataPointer: UnsafeMutableRawPointer!, length dataLength: Int) -> Bytes {
         let opaquePointer = OpaquePointer(dataPointer)
         let unsafePointer = UnsafeMutablePointer<Byte>(opaquePointer)
         return Array(UnsafeBufferPointer<Byte>(start: unsafePointer, count: dataLength))
@@ -166,13 +166,13 @@ public class NintendoSwitchBluetoothManager: NSObject, IOBluetoothL2CAPChannelDe
             fatalError("Received data from non-interrupt channel.")
         }
     }
-    func sendEmptyInputReport(l2capChannel: IOBluetoothL2CAPChannel) -> IOReturn {
+    private func sendEmptyInputReport(l2capChannel: IOBluetoothL2CAPChannel) -> IOReturn {
         logger.debug(#function)
         var emptyInputReport = Bytes(repeating: 0, count: 364);
         emptyInputReport[0] = 0xA1
         return l2capChannel.writeSync(&emptyInputReport, length: UInt16(emptyInputReport.count))
     }
-    func triggerResponseFromSwitch(l2capChannel: IOBluetoothL2CAPChannel){
+    private func triggerResponseFromSwitch(l2capChannel: IOBluetoothL2CAPChannel){
         logger.info(#function)
         for _ in (1...10) {
             let result = sendEmptyInputReport(l2capChannel: l2capChannel)
