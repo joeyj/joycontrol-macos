@@ -29,7 +29,7 @@ class InputReport: CustomDebugStringConvertible {
         return "\(reportId) \(subCommand)\n\(bytesDescription)"
     }
 
-    init(_ data: Bytes?) throws {
+    init(_ data: Bytes? = nil) throws {
         let tempData = data ?? kDefaultInputReportData
         if tempData[0] != 0xA1 {
             throw ArgumentError.invalid("Input reports must start with 0xA1")
@@ -174,11 +174,9 @@ class InputReport: CustomDebugStringConvertible {
         data[offset + 11] = 0x00 // 0x00: use default, 0x01: use SPI
     }
 
-    func sub0x10SpiFlashRead(_ offset: Int, _ size: Byte, _ data: Bytes) throws {
+    func sub0x10SpiFlashRead(_ offset: Int, _ data: Bytes) throws {
         var tempOffset = offset
-        if data.count != size {
-            throw ArgumentError.invalid("Length of data \(data.count) does not match size \(size)")
-        }
+        let size = Byte(data.count)
         if size > 0x1D {
             throw ArgumentError.invalid("Size can not exceed \(0x1D)")
         }

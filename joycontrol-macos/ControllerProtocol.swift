@@ -106,7 +106,7 @@ class ControllerProtocol {
     @objc
     func sendInputReport() {
         logger.info(#function)
-        let inputReport = try! InputReport(nil)
+        let inputReport = try! InputReport()
         inputReport.setVibratorInput()
         inputReport.setMisc()
         if inputReportMode == nil {
@@ -154,18 +154,19 @@ class ControllerProtocol {
         let report = try! OutputReport(data)
         let outputReportId = report.getOutputReportId()
         if outputReportId == OutputReportID.subCommand {
-            _ = try! replyToSubCommand(report)
+            replyToSubCommand(report)
         } else {
             logger.info("Output report \(String(describing: outputReportId)) not implemented - ignoring")
         }
     }
 
     // swiftlint:disable:next cyclomatic_complexity
-    private func replyToSubCommand(_ report: OutputReport) throws -> Bool {
+    private func replyToSubCommand(_ report: OutputReport) {
         // classify sub command
         let subCommand = report.getSubCommand()
         if subCommand == SubCommand.none {
-            fatalError("Received output report does not contain a sub command")
+            logger.error("Received output report does not contain a sub command")
+            return
         }
         logger.info("received output report - Sub command \(String(describing: subCommand))")
 
@@ -184,7 +185,7 @@ class ControllerProtocol {
         case SubCommand.setInputReportMode:
             commandSetInputReportMode(subCommandData) // TODO: when to stop input report mode?
         case SubCommand.triggerButtonsElapsedTime:
-            try! commandTriggerButtonsElapsedTime(subCommandData)
+            commandTriggerButtonsElapsedTime(subCommandData)
 
         case SubCommand.enable6axisSensor:
             commandEnable6axisSensor(subCommandData)
@@ -208,11 +209,10 @@ class ControllerProtocol {
         default:
             logger.info("Sub command 0x{subCommand.value:02x} not implemented - ignoring")
         }
-        return true
     }
 
     private func createStandardInputReport() -> InputReport {
-        let inputReport = try! InputReport(nil)
+        let inputReport = try! InputReport()
         inputReport.setStandardInputReport()
         inputReport.setMisc()
         return inputReport
@@ -252,7 +252,7 @@ class ControllerProtocol {
         let size = subCommandData[4]
 
         let spiFlashData = Array(spiFlash.data[offset ... offset + Int(size) - 1])
-        try! inputReport.sub0x10SpiFlashRead(offset, size, spiFlashData)
+        try! inputReport.sub0x10SpiFlashRead(offset, spiFlashData)
         write(inputReport)
     }
 
@@ -264,7 +264,7 @@ class ControllerProtocol {
         }
         // Start input report reader
         if [InputReportId.imu, InputReportId.setNfcData].contains(requestedInputReportMode) {
-            try! inputReportModeFull()
+            inputReportModeFull()
         } else {
             let debugDesc = String(describing: requestedInputReportMode)
             logger.info("input report mode \(debugDesc) not implemented - ignoring request")
@@ -283,7 +283,7 @@ class ControllerProtocol {
         write(inputReport)
     }
 
-    private func commandTriggerButtonsElapsedTime(_: Bytes) throws {
+    private func commandTriggerButtonsElapsedTime(_: Bytes) {
         let inputReport = createStandardInputReport()
 
         inputReport.setAck(0x83)
@@ -295,7 +295,7 @@ class ControllerProtocol {
             // TODO: What do we do if we want to pair a combined JoyCon?
             try! inputReport.sub0x04TriggerButtonsElapsedTime(SLMs: 3_000, SRMs: 3_000)
         } else {
-            throw ApplicationError.general(String(describing: controller))
+            fatalError("Unexpected controller: \(String(describing: controller))")
         }
 
         write(inputReport)
