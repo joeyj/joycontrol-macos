@@ -118,7 +118,7 @@ class ButtonState {
     }
 
     func setButton(_ button: ControllerButton, pushed: Bool = true) throws {
-        logger.info(#function)
+        logger.debug(#function)
         if !availableButtons.contains(button) {
             throw ApplicationError.general("Given button \"\(button)\" is not available to \(controller.name).")
         }
@@ -126,7 +126,7 @@ class ButtonState {
     }
 
     func getButton(_ button: ControllerButton) throws -> Bool {
-        logger.info(#function)
+        logger.debug(#function)
         if !availableButtons.contains(button) {
             throw ApplicationError.general("Given button \"\(button)\" is not available to \(controller.name).")
         }
@@ -138,7 +138,7 @@ class ButtonState {
     }
 
     func bytes() -> Bytes {
-        logger.info(#function)
+        logger.debug(#function)
         let byte1Value = buttonStates[ButtonState.byte1Index]
         let byte2Value = buttonStates[ButtonState.byte2Index]
         let byte3Value = buttonStates[ButtonState.byte3Index]

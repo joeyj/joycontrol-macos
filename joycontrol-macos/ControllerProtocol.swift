@@ -20,7 +20,7 @@ class ControllerProtocol {
     let controller: Controller
     let spiFlash: FlashMemory
     let setPlayerLightsSemaphore: DispatchSemaphore
-    var transport: IOBluetoothL2CAPChannel?
+    let transport: IOBluetoothL2CAPChannel
     private var inputReportTimer: Byte
     private var inputReportMode: InputReportId?
     private let dataReceived: DispatchSemaphore
@@ -32,7 +32,8 @@ class ControllerProtocol {
         controller: Controller,
         spiFlash: FlashMemory,
         hostAddress: BluetoothAddress,
-        delegate: ControllerProtocolDelgate
+        delegate: ControllerProtocolDelgate,
+        transport: IOBluetoothL2CAPChannel
     ) {
         self.controller = controller
         self.spiFlash = spiFlash
@@ -49,17 +50,14 @@ class ControllerProtocol {
         setPlayerLightsSemaphore = DispatchSemaphore(value: 0)
         self.hostAddress = hostAddress
         self.delegate = delegate
+        self.transport = transport
         controllerState = ControllerState(controllerProtocol: self, controller: controller, spiFlash: spiFlash)
     }
 
     /// Waits for the controller state to be sent.
     /// - Throws: ApplicationError.general if the connection was lost.
     func sendControllerState() {
-        logger.info(#function)
-        if transport == nil {
-            fatalError("Transport not registered.")
-        }
-
+        logger.debug(#function)
         controllerState!.sendCompleteSemaphore.wait() // wait for a send to complete
     }
 
@@ -67,10 +65,8 @@ class ControllerProtocol {
     /// Fires sigIsSend event in the controller state afterwards.
     /// - Throws: ationError.general if the connection was lost.
     func write(_ inputReport: InputReport) {
-        logger.info(#function)
-        if transport == nil {
-            fatalError("Transport not registered.")
-        }
+        logger.debug(#function)
+
         // set button and stick data of input report
         inputReport.setButtonStatus(controllerState!.buttonState.bytes())
         let leftStick = controllerState?.leftStickState?.bytes() ?? [0x00, 0x00, 0x00]
@@ -83,29 +79,21 @@ class ControllerProtocol {
         inputReportTimer = Byte(newTimerValue > Byte.max ? 0 : newTimerValue)
         logger.info("new inputReportTimer value: \(self.inputReportTimer)")
         var bytes = inputReport.bytes()
-        transport!.writeSync(&bytes, length: UInt16(bytes.count))
+        transport.writeSync(&bytes, length: UInt16(bytes.count))
 
         controllerState!.sendCompleteSemaphore.signal()
     }
 
-    func connectionMade(_ transport: IOBluetoothL2CAPChannel) {
-        logger.info(#function)
-        self.transport = transport
-    }
-
     func connectionLost() {
-        if transport != nil {
-            logger.info(#function)
-            transport = nil
-            inputReportModeTimer?.invalidate()
-            inputReportMode = nil
-        }
+        logger.debug(#function)
+        inputReportModeTimer?.invalidate()
+        inputReportMode = nil
         delegate?.controllerProtocolConnectionLost()
     }
 
     @objc
     func sendInputReport() {
-        logger.info(#function)
+        logger.debug(#function)
         let inputReport = try! InputReport()
         inputReport.setVibratorInput()
         inputReport.setMisc()
@@ -127,7 +115,7 @@ class ControllerProtocol {
     }
 
     func inputReportModeFull() {
-        logger.info(#function)
+        logger.debug(#function)
         if inputReportModeTimer != nil {
             logger.info("already in input report mode")
             return
@@ -148,7 +136,7 @@ class ControllerProtocol {
     }
 
     func reportReceived(_ data: Bytes) {
-        logger.info(#function)
+        logger.debug(#function)
         dataReceived.signal()
 
         let report = try! OutputReport(data)

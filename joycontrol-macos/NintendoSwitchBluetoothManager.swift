@@ -34,13 +34,13 @@ class NintendoSwitchBluetoothManager: NSObject, IOBluetoothL2CAPChannelDelegate,
     }
 
     func stopScan() {
-        logger.info(#function)
+        logger.debug(#function)
         let host = HostController.default!
         try! host.writeScanEnable(scanEnable: HCIWriteScanEnable.ScanEnable.noScans)
     }
 
     func startScan() {
-        logger.info(#function)
+        logger.debug(#function)
         let host = HostController.default!
         try! host.writeScanEnable(scanEnable: HCIWriteScanEnable.ScanEnable.inquiryAndPageScan)
     }
@@ -187,7 +187,7 @@ class NintendoSwitchBluetoothManager: NSObject, IOBluetoothL2CAPChannelDelegate,
     }
 
     private func triggerResponseFromSwitch(l2capChannel: IOBluetoothL2CAPChannel) {
-        logger.info(#function)
+        logger.debug(#function)
         for _ in 1 ... 10 {
             let result = sendEmptyInputReport(l2capChannel: l2capChannel)
             guard result == kIOReturnSuccess else {
@@ -197,7 +197,7 @@ class NintendoSwitchBluetoothManager: NSObject, IOBluetoothL2CAPChannelDelegate,
     }
 
     func l2capChannelOpenComplete(_ l2capChannel: IOBluetoothL2CAPChannel!, status error: IOReturn) {
-        logger.info(#function)
+        logger.debug(#function)
         guard error == kIOReturnSuccess else {
             logger.error("Channel open failed: \(error)")
             return
@@ -212,9 +212,7 @@ class NintendoSwitchBluetoothManager: NSObject, IOBluetoothL2CAPChannelDelegate,
         case NintendoSwitchBluetoothManager.interruptPsm:
             logger.info("Interrupt PSM Channel Connected")
             interruptChannel = l2capChannel
-            controllerProtocol = ControllerProtocol(controller: Controller.proController, spiFlash: try! FlashMemory(), hostAddress: hostAddress!, delegate: self)
-            controllerProtocol?.connectionMade(l2capChannel)
-            stopScan()
+            controllerProtocol = ControllerProtocol(controller: Controller.proController, spiFlash: try! FlashMemory(), hostAddress: hostAddress!, delegate: self, transport: l2capChannel)
             triggerResponseFromSwitch(l2capChannel: l2capChannel)
             deviceAddress = l2capChannel.device.addressString.split(separator: "-").joined(separator: ":")
 

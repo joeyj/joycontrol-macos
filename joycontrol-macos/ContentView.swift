@@ -86,7 +86,7 @@ struct ContentView: View {
             logger.info("controllerProtocol not initialized")
             return
         }
-        logger.info(#function)
+        logger.debug(#function)
         logger.info("\(String(describing: buttons))")
         buttonPush(controllerState: bluetoothManager.controllerProtocol!.controllerState!, buttons: buttons)
     }
