@@ -87,7 +87,7 @@ class StickState {
     }
 
     private func validate(_ val: Byte) throws {
-        if !(val >= 0 && val < 0xFF) { // 0x1000) { Why does this support larger than byte values?
+        if !(val >= 0 && val < 0xFF) {
             throw ApplicationError.general("Stick values must be in [0,\(0xFF))")
         }
     }
@@ -180,9 +180,7 @@ struct ControllerState {
 
         buttonState = ButtonState(controller)
 
-        // create left stick state
         if [Controller.proController, Controller.joyconL].contains(controller) {
-            // load calibration data from memory
             let calibrationData = spiFlash.getUserLStickCalibration() ?? spiFlash.getFactoryLStickCalibration()
 
             let calibration = LeftStickCalibration.fromBytes(calibrationData)
@@ -193,9 +191,7 @@ struct ControllerState {
             leftStickState = nil
         }
 
-        // create right stick state
         if [Controller.proController, Controller.joyconR].contains(controller) {
-            // load calibration data from memory
             let calibrationData = spiFlash.getUserRStickCalibration() ?? spiFlash.getFactoryRStickCalibration()
 
             let calibration = RightStickCalibration.fromBytes(calibrationData)
