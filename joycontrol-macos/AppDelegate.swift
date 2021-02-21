@@ -10,6 +10,6 @@ import Foundation
 
 public class AppDelegate: NSObject, NSApplicationDelegate {
     public func applicationWillTerminate(_ notification: Notification) {
-        BluetoothManager.shared.cleanup()
+        NintendoSwitchBluetoothManager.shared.cleanup()
     }
 }

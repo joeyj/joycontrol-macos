@@ -52,6 +52,7 @@ public enum SubCommand : Byte
          requestDeviceInfo = 0x02,
          setInputReportMode = 0x03,
          triggerButtonsElapsedTime = 0x04,
+         setHCIState = 0x06,
          setShipmentState = 0x08,
          spiFlashRead = 0x10,
          setNfcIrMcuConfig = 0x21,

@@ -13,7 +13,7 @@ struct ContentView: View {
     var logger: Logger = Logger()
     @State public var toggleAllowPairing: Bool
     @AppStorage("deviceAddress") private var deviceAddress: String = ""
-    @ObservedObject public var bluetoothManager: BluetoothManager = BluetoothManager.shared
+    @ObservedObject public var bluetoothManager: NintendoSwitchBluetoothManager = NintendoSwitchBluetoothManager.shared
     var body: some View {
         VStack(alignment: .center, spacing: nil, content: {
             Toggle("Allow Pairing", isOn:$toggleAllowPairing)
@@ -21,47 +21,53 @@ struct ContentView: View {
                     setAllowPairing(value)
                 }
             TextField("Nintendo Switch Device Address", text: $deviceAddress)
-            Button("Connect", action: { bluetoothManager.setupNintendoSwitchDevice($deviceAddress.wrappedValue)
+            HStack(alignment: .center, spacing: nil, content: {
+                Button("Connect", action: { bluetoothManager.connectNintendoSwitch($deviceAddress.wrappedValue)
+                })
+                Button("Disconnect", action: { bluetoothManager.disconnectNintendoSwitch($deviceAddress.wrappedValue)
+                })
             })
             HStack(alignment: .center, spacing: 120, content: {
                 controllerButton(ControllerButton.zl)
                 controllerButton(ControllerButton.zr)
             })
             HStack(alignment: .center, spacing: 120, content: {
-                controllerButton(ControllerButton.l)
-                controllerButton(ControllerButton.r)
+            controllerButton(ControllerButton.l)
+            controllerButton(ControllerButton.r)
             })
             HStack(alignment: .center, spacing: 100, content: {
-                controllerButton(ControllerButton.minus)
-                controllerButton(ControllerButton.plus)
+            controllerButton(ControllerButton.minus)
+            controllerButton(ControllerButton.plus)
             })
             HStack(alignment: .center, spacing: 60, content: {
-                controllerButton(ControllerButton.leftStick)
-                VStack(alignment: /*@START_MENU_TOKEN@*/.center/*@END_MENU_TOKEN@*/, spacing: /*@START_MENU_TOKEN@*/nil/*@END_MENU_TOKEN@*/, content: {
-                    controllerButton(ControllerButton.x)
-                    HStack(content: {
-                        controllerButton(ControllerButton.y)
-                        controllerButton(ControllerButton.a)
-                    })
-                    controllerButton(ControllerButton.b)
-                })
+            controllerButton(ControllerButton.leftStick)
+            VStack(alignment: /*@START_MENU_TOKEN@*/.center/*@END_MENU_TOKEN@*/, spacing: /*@START_MENU_TOKEN@*/nil/*@END_MENU_TOKEN@*/, content: {
+            controllerButton(ControllerButton.x)
+            HStack(content: {
+            controllerButton(ControllerButton.y)
+            controllerButton(ControllerButton.a)
+            })
+            controllerButton(ControllerButton.b)
+            })
             })
             HStack(alignment: .center, spacing: 60, content: {
-                VStack(alignment: /*@START_MENU_TOKEN@*/.center/*@END_MENU_TOKEN@*/, spacing: /*@START_MENU_TOKEN@*/nil/*@END_MENU_TOKEN@*/, content: {
-                    controllerButton(ControllerButton.up)
-                    HStack(content: {
-                        controllerButton(ControllerButton.left)
-                        controllerButton(ControllerButton.right)
-                    })
-                    controllerButton(ControllerButton.down)
-                })
-                controllerButton(ControllerButton.rightStick)
+            VStack(alignment: /*@START_MENU_TOKEN@*/.center/*@END_MENU_TOKEN@*/, spacing: /*@START_MENU_TOKEN@*/nil/*@END_MENU_TOKEN@*/, content: {
+            controllerButton(ControllerButton.up)
+            HStack(content: {
+            controllerButton(ControllerButton.left)
+            controllerButton(ControllerButton.right)
+            })
+            controllerButton(ControllerButton.down)
+            })
+            controllerButton(ControllerButton.rightStick)
             })
             HStack(alignment: .center, spacing: 60, content: {
-                controllerButton(ControllerButton.capture)
-                controllerButton(ControllerButton.home)
+            controllerButton(ControllerButton.capture)
+            controllerButton(ControllerButton.home)
             })
-        }).toggleStyle(SwitchToggleStyle())
+        })
+        .padding()
+        .toggleStyle(SwitchToggleStyle())
         .onReceive(Just(bluetoothManager), perform: {
             output in
             if deviceAddress == "" {

@@ -10,6 +10,10 @@ import IOBluetooth
 import Bluetooth
 import os.log
 
+public protocol ControllerProtocolDelgate {
+    func controllerProtocolConnectionLost()
+}
+
 public class ControllerProtocol {
     private var logger: Logger = Logger()
     public var controller: Controller
@@ -22,7 +26,8 @@ public class ControllerProtocol {
     public var controllerState: ControllerState?
     private var inputReportModeTimer: Timer?
     private var hostAddress: BluetoothAddress
-    public init(controller: Controller, spiFlash: FlashMemory, hostAddress: BluetoothAddress) {
+    private let delegate: ControllerProtocolDelgate
+    public init(controller: Controller, spiFlash: FlashMemory, hostAddress: BluetoothAddress, delegate: ControllerProtocolDelgate) {
         self.controller = controller
         self.spiFlash = spiFlash
         
@@ -37,6 +42,7 @@ public class ControllerProtocol {
         // This event gets triggered once the Switch assigns a player number to the controller and accepts user inputs
         self.setPlayerLightsSemaphore = DispatchSemaphore(value: 0)
         self.hostAddress = hostAddress
+        self.delegate = delegate
         self.controllerState = ControllerState(controllerProtocol: self, controller: controller, spiFlash:spiFlash)
     }
     /// Waits for the controller state to be sent.
@@ -98,6 +104,7 @@ public class ControllerProtocol {
             self.inputReportModeTimer?.invalidate()
             self.inputReportMode = nil
         }
+        delegate.controllerProtocolConnectionLost()
     }
     @objc func sendInputReport() throws {
         logger.info(#function)
@@ -138,7 +145,6 @@ public class ControllerProtocol {
                 }
                 try! self.sendInputReport()
                 lastSent = Date()
-                
             }
         }
     }
@@ -196,6 +202,10 @@ public class ControllerProtocol {
         }
         else if subCommand == SubCommand.setPlayerLights {
             self.commandSetPlayerLights(subCommandData)
+        }
+        else if subCommand == SubCommand.setHCIState {
+            // assume Nintendo Switch is going to sleep
+            connectionLost()
         }
         else {
             logger.info("Sub command 0x{subCommand.value:02x} not implemented - ignoring")
