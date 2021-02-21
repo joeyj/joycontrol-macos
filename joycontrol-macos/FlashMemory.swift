@@ -9,10 +9,10 @@ import Foundation
 
 let kFactoryLStickCalibration: Bytes = [0x00, 0x07, 0x70, 0x00, 0x08, 0x80, 0x00, 0x07, 0x70]
 let kFactoryRStickCalibration: Bytes = [0x00, 0x08, 0x80, 0x00, 0x07, 0x70, 0x00, 0x07, 0x70]
-let kDefaultFlashMemory = Bytes(repeating: 0xFF, count: 0x603C) // Blank data is all 0xFF
+let kDefaultFlashMemory = Bytes(repeating: 0xFF, count: 0x603D) // Blank data is all 0xFF
     + kFactoryLStickCalibration
     + kFactoryRStickCalibration
-    + Bytes(repeating: 0xFF, count: 0x80000 - 0x604E)
+    + Bytes(repeating: 0xFF, count: 0x80000 - 0x604E - 1)
 
 class FlashMemory {
     let data: Bytes
