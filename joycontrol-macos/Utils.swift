@@ -57,7 +57,8 @@ enum OutputReportID: Byte {
 }
 
 enum InputReportId: Byte {
-    case standard = 0x21,
+    case none = 0x00,
+         standard = 0x21,
          imu = 0x30,
          setNfcData = 0x31
 }
@@ -85,6 +86,38 @@ enum ControllerButton: String {
          sr,
          sl
     // swiftlint:enable identifier_name
+}
+
+func addSdpRecordFromPlistOrFail(_ path: String) -> IOBluetoothSDPServiceRecord {
+    let serviceDictionary = NSMutableDictionary(contentsOfFile: path)
+    let serviceRecord = IOBluetoothSDPServiceRecord.publishedServiceRecord(with: serviceDictionary! as [NSObject: AnyObject])
+    if serviceRecord == nil {
+        fatalError("Failed to add SDP Service Record.")
+    }
+    return serviceRecord!
+}
+
+func registerL2CAPChannelOpenNotifications(
+    psm: BluetoothL2CAPPSM,
+    target: AnyObject,
+    selector: Selector,
+    direction: IOBluetoothUserNotificationChannelDirection = kIOBluetoothUserNotificationChannelDirectionIncoming
+) {
+    guard IOBluetoothL2CAPChannel
+        .register(
+            forChannelOpenNotifications: target,
+            selector: selector,
+            withPSM: psm,
+            direction: direction
+        ) != nil
+    else {
+        fatalError("Failed to register for channel \(psm) open notifications.")
+    }
+}
+
+func registerHIDChannelsOpen(target: AnyObject, selector: Selector) {
+    registerL2CAPChannelOpenNotifications(psm: BluetoothL2CAPPSM(kBluetoothL2CAPPSMHIDControl), target: target, selector: selector)
+    registerL2CAPChannelOpenNotifications(psm: BluetoothL2CAPPSM(kBluetoothL2CAPPSMHIDInterrupt), target: target, selector: selector)
 }
 
 enum Utils {

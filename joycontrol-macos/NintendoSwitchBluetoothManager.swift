@@ -24,7 +24,8 @@ class NintendoSwitchBluetoothManager: NSObject, IOBluetoothL2CAPChannelDelegate,
     private var serviceRecord: IOBluetoothSDPServiceRecord?
     private var hostAddress: BluetoothAddress?
     private let logger = Logger()
-    var controllerProtocol: ControllerProtocol?
+    private var controllerProtocol: ControllerProtocol?
+    private var nintendoSwitch: IOBluetoothDevice?
     @objc @Published var deviceAddress: String = ""
     private var connected: Bool = false
 
@@ -33,16 +34,13 @@ class NintendoSwitchBluetoothManager: NSObject, IOBluetoothL2CAPChannelDelegate,
         NintendoSwitchBluetoothManager.hostController.delegate = self
     }
 
-    func stopScan() {
+    func setScanEnabled(enabled: Bool) {
         logger.debug(#function)
         let host = HostController.default!
-        try! host.writeScanEnable(scanEnable: HCIWriteScanEnable.ScanEnable.noScans)
-    }
-
-    func startScan() {
-        logger.debug(#function)
-        let host = HostController.default!
-        try! host.writeScanEnable(scanEnable: HCIWriteScanEnable.ScanEnable.inquiryAndPageScan)
+        try! host.writeScanEnable(
+            scanEnable: enabled ? HCIWriteScanEnable.ScanEnable.inquiryAndPageScan
+                : HCIWriteScanEnable.ScanEnable.noScans
+        )
     }
 
     func getIsScanEnabled() -> Bool {
@@ -55,9 +53,12 @@ class NintendoSwitchBluetoothManager: NSObject, IOBluetoothL2CAPChannelDelegate,
         interruptChannel = nil
         controlChannel = nil
         controllerProtocol = nil
+        nintendoSwitch = nil
+        interruptChannelOutgoing = nil
+        controlChannelOutgoing = nil
     }
 
-    private func ensureBluetoothControllerConfigured() {
+    private func configureHostControllerForNintendoSwitch() {
         let host = HostController.default!
         let deviceName = "Pro Controller"
         try! host.writeLocalName(deviceName)
@@ -75,85 +76,43 @@ class NintendoSwitchBluetoothManager: NSObject, IOBluetoothL2CAPChannelDelegate,
         var response = BluetoothHCIExtendedInquiryResponse(data: data)
         controller.bluetoothHCIWriteExtendedInquiryResponse(Byte(kBluetoothHCIFECNotRequired.rawValue), in: &response)
         hostAddress = try! host.readDeviceAddress()
-    }
-
-    private func addSdpRecord() {
-        let serviceDictionary = NSMutableDictionary(contentsOfFile: Bundle.main.path(forResource: "NintendoSwitchControllerSDP", ofType: "plist")!)
-        serviceRecord = IOBluetoothSDPServiceRecord.publishedServiceRecord(with: serviceDictionary! as [NSObject: AnyObject])
-        if serviceRecord == nil {
-            logger.info("serviceRecord is nil")
-            return
-        }
-        logger.info("\(self.serviceRecord!.debugDescription)")
+        serviceRecord = addSdpRecordFromPlistOrFail(Bundle.main.path(forResource: "NintendoSwitchControllerSDP", ofType: "plist")!)
+        logger.debug("\(self.serviceRecord!.debugDescription)")
+        registerHIDChannelsOpen(target: self, selector: #selector(newL2CAPChannelOpened))
     }
 
     private func onBluetoothPoweredOn() {
-        ensureBluetoothControllerConfigured()
-        addSdpRecord()
-        registerChannelOpenDelegate()
+        configureHostControllerForNintendoSwitch()
     }
 
     private func onBluetoothPoweredOff() {}
 
-    private func registerChannelOpenDelegate() {
-        guard IOBluetoothL2CAPChannel
-            .register(
-                forChannelOpenNotifications: self,
-                selector: #selector(newL2CAPChannelOpened),
-                withPSM: NintendoSwitchBluetoothManager.controlPsm,
-                direction: kIOBluetoothUserNotificationChannelDirectionIncoming
-            ) != nil
-        else {
-            logger.info("failed to register for channel \(NintendoSwitchBluetoothManager.controlPsm) open notifications.")
-            return
-        }
-        guard IOBluetoothL2CAPChannel
-            .register(
-                forChannelOpenNotifications: self,
-                selector: #selector(newL2CAPChannelOpened),
-                withPSM: NintendoSwitchBluetoothManager.interruptPsm,
-                direction: kIOBluetoothUserNotificationChannelDirectionIncoming
-            ) != nil
-        else {
-            logger.info("failed to register for channel \(NintendoSwitchBluetoothManager.interruptPsm) open notifications.")
-            return
-        }
-    }
-
     func connectNintendoSwitch(_ address: String) {
         logger.debug(#function)
-        DispatchQueue.main.async {
-            let nintendoSwitch = IOBluetoothDevice(addressString: address)!
-            nintendoSwitch.openConnection()
-            self.openL2CAPChannelOrFail(nintendoSwitch, NintendoSwitchBluetoothManager.controlPsm, &self.controlChannelOutgoing)
-            self.openL2CAPChannelOrFail(nintendoSwitch, NintendoSwitchBluetoothManager.interruptPsm, &self.interruptChannelOutgoing)
+        guard nintendoSwitch == nil else {
+            logger.error("Nintendo Switch is already connected. Skipping.")
+            return
+        }
+        DispatchQueue.main.async { [self] in
+            nintendoSwitch = IOBluetoothDevice(addressString: address)!
+            nintendoSwitch!.openConnection()
+            openL2CAPChannelOrFail(nintendoSwitch!, NintendoSwitchBluetoothManager.controlPsm, &controlChannelOutgoing)
+            openL2CAPChannelOrFail(nintendoSwitch!, NintendoSwitchBluetoothManager.interruptPsm, &interruptChannelOutgoing)
         }
     }
 
-    func disconnectNintendoSwitch(_ address: String) {
+    func disconnectNintendoSwitch() {
         logger.debug(#function)
         DispatchQueue.main.async { [self] in
-            let nintendoSwitch = IOBluetoothDevice(addressString: address)!
-            guard nintendoSwitch.isConnected() else {
-                self.logger.debug("Nintendo Switch isn't connected. Skipping disconnect.")
-                return
-            }
-            self.interruptChannelOutgoing?.close()
-            self.interruptChannelOutgoing = nil
-            self.controlChannelOutgoing?.close()
-            self.controlChannelOutgoing = nil
-            nintendoSwitch.closeConnection()
+            interruptChannelOutgoing?.close()
+            controlChannelOutgoing?.close()
+            nintendoSwitch?.closeConnection()
         }
-    }
-
-    private func cleanup() {
-        logger.info("Removing service record")
-        serviceRecord?.remove()
     }
 
     private func openL2CAPChannelOrFail(_ device: IOBluetoothDevice, _ psm: BluetoothL2CAPPSM, _ channel: AutoreleasingUnsafeMutablePointer<IOBluetoothL2CAPChannel?>!) {
         let result = device.openL2CAPChannelSync(channel, withPSM: psm, delegate: self)
-        guard result == kIOReturnSuccess else {
+        guard result == kIOReturnSuccess else { // if timeout, show dialog instead of fatalError?
             fatalError("Failed to open l2cap channel PSM: \(psm) result: \(result)")
         }
     }
@@ -179,23 +138,6 @@ class NintendoSwitchBluetoothManager: NSObject, IOBluetoothL2CAPChannelDelegate,
         }
     }
 
-    private func sendEmptyInputReport(l2capChannel: IOBluetoothL2CAPChannel) -> IOReturn {
-        logger.debug(#function)
-        var emptyInputReport = Bytes(repeating: 0, count: 364)
-        emptyInputReport[0] = 0xA1
-        return l2capChannel.writeSync(&emptyInputReport, length: UInt16(emptyInputReport.count))
-    }
-
-    private func triggerResponseFromSwitch(l2capChannel: IOBluetoothL2CAPChannel) {
-        logger.debug(#function)
-        for _ in 1 ... 10 {
-            let result = sendEmptyInputReport(l2capChannel: l2capChannel)
-            guard result == kIOReturnSuccess else {
-                fatalError("sentEmptyInputReport failed with result: \(result)")
-            }
-        }
-    }
-
     func l2capChannelOpenComplete(_ l2capChannel: IOBluetoothL2CAPChannel!, status error: IOReturn) {
         logger.debug(#function)
         guard error == kIOReturnSuccess else {
@@ -213,7 +155,7 @@ class NintendoSwitchBluetoothManager: NSObject, IOBluetoothL2CAPChannelDelegate,
             logger.info("Interrupt PSM Channel Connected")
             interruptChannel = l2capChannel
             controllerProtocol = ControllerProtocol(controller: Controller.proController, spiFlash: try! FlashMemory(), hostAddress: hostAddress!, delegate: self, transport: l2capChannel)
-            triggerResponseFromSwitch(l2capChannel: l2capChannel)
+            nintendoSwitch = l2capChannel.device
             deviceAddress = l2capChannel.device.addressString.split(separator: "-").joined(separator: ":")
 
         default:
@@ -233,18 +175,8 @@ class NintendoSwitchBluetoothManager: NSObject, IOBluetoothL2CAPChannelDelegate,
         }
     }
 
-    func l2capChannelReconfigured(_ l2capChannel: IOBluetoothL2CAPChannel!) {
-        logger.debug(#function)
-        logger.debug("\(l2capChannel.debugDescription)")
-    }
-
     func l2capChannelWriteComplete(_: IOBluetoothL2CAPChannel!, refcon _: UnsafeMutableRawPointer!, status _: IOReturn) {
         logger.debug(#function)
-    }
-
-    func l2capChannelQueueSpaceAvailable(_ l2capChannel: IOBluetoothL2CAPChannel!) {
-        logger.debug(#function)
-        logger.debug("\(l2capChannel.debugDescription)")
     }
 
     func bluetoothHCIEventNotificationMessage(_ controller: IOBluetoothHostController, in _: IOBluetoothHCIEventNotificationMessageRef) {
@@ -260,7 +192,18 @@ class NintendoSwitchBluetoothManager: NSObject, IOBluetoothL2CAPChannelDelegate,
         }
     }
 
+    func controllerButtonPushed(buttons: [ControllerButton]) {
+        guard controllerProtocol != nil else {
+            logger.info("controllerProtocol not initialized")
+            return
+        }
+        logger.debug(#function)
+        logger.info("\(String(describing: buttons))")
+        buttonPush(controllerState: controllerProtocol!.controllerState!, buttons: buttons)
+    }
+
     deinit {
-        cleanup()
+        logger.debug("Removing service record")
+        serviceRecord?.remove()
     }
 }

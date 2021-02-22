@@ -7,7 +7,120 @@
 
 import Bluetooth
 import Foundation
-let kDefaultInputReportData = [0xA1] + Bytes(repeating: 0x00, count: 361)
+private let kDefaultInputReportData = [0xA1] + Bytes(repeating: 0x00, count: 361)
+func createStandardInputReport() -> InputReport {
+    let inputReport = try! InputReport()
+    inputReport.setStandardInputReport()
+    inputReport.setMisc()
+    return inputReport
+}
+
+enum InputReportFactory {
+    private static let subCommandToInputReport: [SubCommand: (_ ir: InputReport, _ cp: ControllerProtocol, _ subCommandData: Bytes) -> Void] = [
+        SubCommand.requestDeviceInfo: requestDeviceInfo,
+        SubCommand.setShipmentState: setShipmentState,
+        SubCommand.spiFlashRead: spiFlashRead,
+        SubCommand.triggerButtonsElapsedTime: triggerButtonsElapsedTime,
+        SubCommand.enable6axisSensor: enable6axisSensor,
+        SubCommand.enableVibration: enableVibration,
+        SubCommand.setNfcIrMcuConfig: setNfcIrMcuConfig
+    ]
+    static func fromSubCommand(_ subCommand: SubCommand, _ subCommandData: Bytes) -> ((_ cp: ControllerProtocol) -> InputReport)? {
+        let customFactory = subCommandToInputReport[subCommand]
+        guard customFactory != nil else {
+            return nil
+        }
+        func factory(_ data: ControllerProtocol) -> InputReport {
+            let inputReport = createStandardInputReport()
+            customFactory!(inputReport, data, subCommandData)
+            return inputReport
+        }
+        return factory
+    }
+
+    private static func requestDeviceInfo(inputReport: InputReport, _ data: ControllerProtocol, _: Bytes) {
+        inputReport.sub0x02DeviceInfo(mac: data.hostAddress.bytes, controller: data.controller)
+    }
+
+    private static func setShipmentState(inputReport: InputReport, _: ControllerProtocol, _: Bytes) {
+        inputReport.setAck(0x80)
+        inputReport.replyToSubCommandId(SubCommand.setShipmentState)
+    }
+
+    /// Replies with 0x21 input report containing requested data from the flash memory.
+    /// - Parameter subCommandData: input report sub command data bytes
+    private static func spiFlashRead(inputReport: InputReport, _ data: ControllerProtocol, _ subCommandData: Bytes) {
+        // parse offset
+        var offset = 0
+        var digit = 1
+        for index in 0 ... 3 {
+            offset += Int(subCommandData[index]) * digit
+            digit *= 0x100
+        }
+        let size = subCommandData[4]
+
+        let spiFlashData = Array(data.spiFlash.data[offset ... offset + Int(size) - 1])
+        try! inputReport.sub0x10SpiFlashRead(offset, spiFlashData)
+    }
+
+    private static func triggerButtonsElapsedTime(inputReport: InputReport, _ data: ControllerProtocol, _: Bytes) {
+        inputReport.setAck(0x83)
+        inputReport.replyToSubCommandId(SubCommand.triggerButtonsElapsedTime)
+        // Hack: We assume this command is only used during pairing - Set values so the Switch assigns a player number
+        if data.controller == Controller.proController {
+            try! inputReport.sub0x04TriggerButtonsElapsedTime(LMs: 3_000, RMs: 3_000)
+        } else if [Controller.joyconL, Controller.joyconR].contains(data.controller) {
+            // TODO: What do we do if we want to pair a combined JoyCon?
+            try! inputReport.sub0x04TriggerButtonsElapsedTime(SLMs: 3_000, SRMs: 3_000)
+        } else {
+            fatalError("Unexpected controller: \(String(describing: data.controller))")
+        }
+    }
+
+    private static func enable6axisSensor(inputReport: InputReport, _: ControllerProtocol, _: Bytes) {
+        inputReport.setAck(0x80)
+        inputReport.replyToSubCommandId(SubCommand.enable6axisSensor)
+    }
+
+    private static func enableVibration(inputReport: InputReport, _: ControllerProtocol, _: Bytes) {
+        inputReport.setAck(0x80)
+        inputReport.replyToSubCommandId(SubCommand.enableVibration)
+    }
+
+    private static func setNfcIrMcuConfig(inputReport: InputReport, _ data: ControllerProtocol, _: Bytes) {
+        // TODO: NFC
+
+        inputReport.setAck(0xA0)
+        inputReport.replyToSubCommandId(SubCommand.setNfcIrMcuConfig)
+
+        let data: Bytes = [
+            1, 0, 255, 0, 8, 0, 27, 1, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 200
+        ]
+        for index in 0 ... data.count - 1 {
+            inputReport.data[16 + index] = data[index]
+        }
+    }
+
+    private static func setNfcIrMcuState(inputReport: InputReport, _: ControllerProtocol, _ subCommandData: Bytes) throws {
+        // TODO: NFC
+        let argument = subCommandData[0]
+
+        if argument == 0x01 {
+            // 0x01 = Resume
+            inputReport.setAck(0x80)
+            inputReport.replyToSubCommandId(SubCommand.setNfcIrMcuState)
+        } else if argument == 0x00 {
+            // 0x00 = Suspend
+            inputReport.setAck(0x80)
+            inputReport.replyToSubCommandId(SubCommand.setNfcIrMcuState)
+        } else {
+            throw ArgumentError.invalid("Argument \(argument) of \(SubCommand.setNfcIrMcuState) not implemented.")
+        }
+    }
+}
+
 /// Class to create Input Reports.
 ///
 /// Reference:
@@ -156,6 +269,7 @@ class InputReport: CustomDebugStringConvertible {
     ///   - mac: Controller MAC address in Big Endian(6 Bytes)
     ///   - fmVersion: TODO
     func sub0x02DeviceInfo(mac: BluetoothAddress.ByteValue, controller: Controller, fmVersion: (Byte, Byte)? = nil) {
+        setAck(0x82)
         let fmVersion = fmVersion == nil ? (0x04, 0x00) : fmVersion!
         replyToSubCommandId(SubCommand.requestDeviceInfo)
         // sub command reply data
@@ -175,6 +289,7 @@ class InputReport: CustomDebugStringConvertible {
     }
 
     func sub0x10SpiFlashRead(_ offset: Int, _ data: Bytes) throws {
+        setAck(0x90)
         var tempOffset = offset
         let size = Byte(data.count)
         if size > 0x1D {

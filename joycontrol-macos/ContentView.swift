@@ -24,7 +24,7 @@ struct ContentView: View {
             HStack(alignment: .center, spacing: nil, content: {
                 Button("Connect", action: { bluetoothManager.connectNintendoSwitch($deviceAddress.wrappedValue)
                 })
-                Button("Disconnect", action: { bluetoothManager.disconnectNintendoSwitch($deviceAddress.wrappedValue)
+                Button("Disconnect", action: { bluetoothManager.disconnectNintendoSwitch()
                 })
             })
             HStack(alignment: .center, spacing: 120, content: {
@@ -77,26 +77,12 @@ struct ContentView: View {
 
     private func controllerButton(_ title: ControllerButton) -> Button<Text> {
         Button(title.rawValue, action: {
-            controllerButtonPushed(buttons: [title])
+            bluetoothManager.controllerButtonPushed(buttons: [title])
         })
     }
 
-    private func controllerButtonPushed(buttons: [ControllerButton]) {
-        guard bluetoothManager.controllerProtocol != nil else {
-            logger.info("controllerProtocol not initialized")
-            return
-        }
-        logger.debug(#function)
-        logger.info("\(String(describing: buttons))")
-        buttonPush(controllerState: bluetoothManager.controllerProtocol!.controllerState!, buttons: buttons)
-    }
-
     private func setAllowPairing(_ allowPairing: Bool) {
-        if allowPairing {
-            bluetoothManager.startScan()
-        } else {
-            bluetoothManager.stopScan()
-        }
+        bluetoothManager.setScanEnabled(enabled: allowPairing)
     }
 }
 
