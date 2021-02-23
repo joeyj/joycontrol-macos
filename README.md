@@ -11,11 +11,12 @@ Adapting joycontrol's usage of bluez to macOS IOBluetooth with support from http
 
 ## Troubleshooting
 
-* If the Switch stops attempting to connect in the ```Change Grip/Order``` screen, try resetting the bluetooth service in macOS:
-
+If the Switch stops attempting to connect in the ```Change Grip/Order``` screen, try:
+* Resetting the bluetooth service in macOS:
 ```
 sudo launchctl stop com.apple.bluetoothd && launchctl start com.apple.bluetoothd
 ```
+* OR: Putting the Switch to sleep and waking it up again
 
 ## TODO/Known Issues
 

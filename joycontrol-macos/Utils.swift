@@ -17,11 +17,11 @@ enum Controller: Byte {
          proController = 0x03
     var name: String {
         switch self {
-        case Controller.joyconL:
+        case .joyconL:
             return "Joy-Con (L)"
-        case Controller.joyconR:
+        case .joyconR:
             return "Joy-Con (R)"
-        case Controller.proController:
+        case .proController:
             return "Pro Controller"
         }
     }

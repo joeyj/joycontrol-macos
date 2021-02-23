@@ -125,7 +125,7 @@ class ControllerProtocol {
         inputReport.set6axisData()
 
         // TODO: NFC - set nfc data
-        if inputReport.getInputReportId() == InputReportId.setNfcData {
+        if inputReport.getInputReportId() == .setNfcData {
             return
         }
 
@@ -159,7 +159,7 @@ class ControllerProtocol {
 
         let report = try! OutputReport(data)
         let outputReportId = report.getOutputReportId()
-        if outputReportId == OutputReportID.subCommand {
+        if outputReportId == .subCommand {
             replyToSubCommand(report)
         } else {
             logger.info("Output report \(String(describing: outputReportId)) not implemented - ignoring")
@@ -169,7 +169,7 @@ class ControllerProtocol {
     private func replyToSubCommand(_ report: OutputReport) {
         // classify sub command
         let subCommand = report.getSubCommand()
-        if subCommand == SubCommand.none {
+        if subCommand == .none {
             logger.error("Received output report does not contain a sub command")
             return
         }
@@ -178,13 +178,13 @@ class ControllerProtocol {
         let subCommandData = report.getSubCommandData()!
 
         switch subCommand {
-        case SubCommand.setInputReportMode:
+        case .setInputReportMode:
             commandSetInputReportMode(subCommandData) // TODO: when to stop input report mode?
 
-        case SubCommand.setPlayerLights:
+        case .setPlayerLights:
             commandSetPlayerLights(subCommandData)
 
-        case SubCommand.setHCIState:
+        case .setHCIState:
             // assume Nintendo Switch is going to sleep
             connectionLost()
 
@@ -210,7 +210,7 @@ class ControllerProtocol {
             logger.info("Already in input report mode \(debugDesc) - ignoring request")
         }
         // Start input report reader
-        if [InputReportId.imu, InputReportId.setNfcData].contains(requestedInputReportMode) {
+        if [.imu, .setNfcData].contains(requestedInputReportMode) {
             inputReportModeFull()
         } else {
             let debugDesc = String(describing: requestedInputReportMode)
@@ -225,7 +225,7 @@ class ControllerProtocol {
         let inputReport = createStandardInputReport()
 
         inputReport.setAck(0x80)
-        inputReport.replyToSubCommandId(SubCommand.setInputReportMode)
+        inputReport.replyToSubCommandId(.setInputReportMode)
 
         write(inputReport)
     }
@@ -234,7 +234,7 @@ class ControllerProtocol {
         let inputReport = createStandardInputReport()
 
         inputReport.setAck(0x80)
-        inputReport.replyToSubCommandId(SubCommand.setPlayerLights)
+        inputReport.replyToSubCommandId(.setPlayerLights)
 
         write(inputReport)
 

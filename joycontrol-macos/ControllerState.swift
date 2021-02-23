@@ -131,7 +131,7 @@ struct ControllerState {
 
         buttonState = ButtonState(controller)
 
-        if [Controller.proController, Controller.joyconL].contains(controller) {
+        if [.proController, .joyconL].contains(controller) {
             let calibrationData = spiFlash.getUserLStickCalibration() ?? spiFlash.getFactoryLStickCalibration()
 
             let calibration = StickCalibration(calibrationData)
@@ -142,7 +142,7 @@ struct ControllerState {
             leftStickState = nil
         }
 
-        if [Controller.proController, Controller.joyconR].contains(controller) {
+        if [.proController, .joyconR].contains(controller) {
             let calibrationData = spiFlash.getUserRStickCalibration() ?? spiFlash.getFactoryRStickCalibration()
 
             let calibration = StickCalibration(calibrationData)

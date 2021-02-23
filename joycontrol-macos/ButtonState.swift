@@ -21,32 +21,16 @@ class ButtonState {
     private static let byte2Index = 1
     private static let byte3Index = 2
     private static let controllerToButtons: [Controller: [ControllerButton]] = [
-        Controller.proController: [
-            ControllerButton.y, ControllerButton.x,
-            ControllerButton.b, ControllerButton.a,
-            ControllerButton.r, ControllerButton.zr,
-            ControllerButton.minus, ControllerButton.plus,
-            ControllerButton.rightStick, ControllerButton.leftStick,
-            ControllerButton.home, ControllerButton.capture,
-            ControllerButton.down, ControllerButton.up,
-            ControllerButton.right, ControllerButton.left,
-            ControllerButton.l, ControllerButton.zl
+        .proController: [
+            .y, .x, .b, .a, .r, .zr, .minus, .plus, .rightStick, .leftStick,
+            .home, .capture, .down, .up, .right, .left, .l, .zl
         ],
-        Controller.joyconR: [
-            ControllerButton.y, ControllerButton.x,
-            ControllerButton.b, ControllerButton.a,
-            ControllerButton.sr, ControllerButton.sl,
-            ControllerButton.r, ControllerButton.zr,
-            ControllerButton.plus, ControllerButton.rightStick,
-            ControllerButton.home
+        .joyconR: [
+            .y, .x, .b, .a, .sr, .sl, .r, .zr, .plus, .rightStick, .home
         ],
-        Controller.joyconL: [
-            ControllerButton.minus, ControllerButton.leftStick,
-            ControllerButton.capture, ControllerButton.down,
-            ControllerButton.up, ControllerButton.right,
-            ControllerButton.left, ControllerButton.sr,
-            ControllerButton.sl, ControllerButton.l,
-            ControllerButton.zl
+        .joyconL: [
+            .minus, .leftStick, .capture, .down, .up, .right, .left, .sr, .sl,
+            .l, .zl
         ]
     ]
     let controller: Controller
@@ -59,44 +43,44 @@ class ButtonState {
 
         availableButtons = ButtonState.controllerToButtons[controller]!
 
-        if controller == Controller.proController || controller == Controller.joyconR {
-            buttonFuncs.updateValue(buttonMethodFactory(ButtonState.byte1Index, 0), forKey: ControllerButton.y)
-            buttonFuncs.updateValue(buttonMethodFactory(ButtonState.byte1Index, 1), forKey: ControllerButton.x)
-            buttonFuncs.updateValue(buttonMethodFactory(ButtonState.byte1Index, 2), forKey: ControllerButton.b)
-            buttonFuncs.updateValue(buttonMethodFactory(ButtonState.byte1Index, 3), forKey: ControllerButton.a)
+        if controller == .proController || controller == .joyconR {
+            buttonFuncs.updateValue(buttonMethodFactory(ButtonState.byte1Index, 0), forKey: .y)
+            buttonFuncs.updateValue(buttonMethodFactory(ButtonState.byte1Index, 1), forKey: .x)
+            buttonFuncs.updateValue(buttonMethodFactory(ButtonState.byte1Index, 2), forKey: .b)
+            buttonFuncs.updateValue(buttonMethodFactory(ButtonState.byte1Index, 3), forKey: .a)
 
-            if controller == Controller.joyconR {
-                buttonFuncs.updateValue(buttonMethodFactory(ButtonState.byte1Index, 4), forKey: ControllerButton.sr)
-                buttonFuncs.updateValue(buttonMethodFactory(ButtonState.byte1Index, 5), forKey: ControllerButton.sl)
+            if controller == .joyconR {
+                buttonFuncs.updateValue(buttonMethodFactory(ButtonState.byte1Index, 4), forKey: .sr)
+                buttonFuncs.updateValue(buttonMethodFactory(ButtonState.byte1Index, 5), forKey: .sl)
             }
 
-            buttonFuncs.updateValue(buttonMethodFactory(ButtonState.byte1Index, 6), forKey: ControllerButton.r)
-            buttonFuncs.updateValue(buttonMethodFactory(ButtonState.byte1Index, 7), forKey: ControllerButton.zr)
+            buttonFuncs.updateValue(buttonMethodFactory(ButtonState.byte1Index, 6), forKey: .r)
+            buttonFuncs.updateValue(buttonMethodFactory(ButtonState.byte1Index, 7), forKey: .zr)
         }
 
-        buttonFuncs.updateValue(buttonMethodFactory(ButtonState.byte2Index, 0), forKey: ControllerButton.minus)
-        buttonFuncs.updateValue(buttonMethodFactory(ButtonState.byte2Index, 1), forKey: ControllerButton.plus)
-        buttonFuncs.updateValue(buttonMethodFactory(ButtonState.byte2Index, 2), forKey: ControllerButton.rightStick)
-        buttonFuncs.updateValue(buttonMethodFactory(ButtonState.byte2Index, 3), forKey: ControllerButton.leftStick)
-        if controller == Controller.joyconR || controller == Controller.proController {
-            buttonFuncs.updateValue(buttonMethodFactory(ButtonState.byte2Index, 4), forKey: ControllerButton.home)
+        buttonFuncs.updateValue(buttonMethodFactory(ButtonState.byte2Index, 0), forKey: .minus)
+        buttonFuncs.updateValue(buttonMethodFactory(ButtonState.byte2Index, 1), forKey: .plus)
+        buttonFuncs.updateValue(buttonMethodFactory(ButtonState.byte2Index, 2), forKey: .rightStick)
+        buttonFuncs.updateValue(buttonMethodFactory(ButtonState.byte2Index, 3), forKey: .leftStick)
+        if controller == .joyconR || controller == .proController {
+            buttonFuncs.updateValue(buttonMethodFactory(ButtonState.byte2Index, 4), forKey: .home)
         }
-        if controller == Controller.joyconL || controller == Controller.proController {
-            buttonFuncs.updateValue(buttonMethodFactory(ButtonState.byte2Index, 5), forKey: ControllerButton.capture)
+        if controller == .joyconL || controller == .proController {
+            buttonFuncs.updateValue(buttonMethodFactory(ButtonState.byte2Index, 5), forKey: .capture)
         }
 
-        if controller == Controller.proController || controller == Controller.joyconL {
-            buttonFuncs.updateValue(buttonMethodFactory(ButtonState.byte3Index, 0), forKey: ControllerButton.down)
-            buttonFuncs.updateValue(buttonMethodFactory(ButtonState.byte3Index, 1), forKey: ControllerButton.up)
-            buttonFuncs.updateValue(buttonMethodFactory(ButtonState.byte3Index, 2), forKey: ControllerButton.right)
-            buttonFuncs.updateValue(buttonMethodFactory(ButtonState.byte3Index, 3), forKey: ControllerButton.left)
+        if controller == .proController || controller == .joyconL {
+            buttonFuncs.updateValue(buttonMethodFactory(ButtonState.byte3Index, 0), forKey: .down)
+            buttonFuncs.updateValue(buttonMethodFactory(ButtonState.byte3Index, 1), forKey: .up)
+            buttonFuncs.updateValue(buttonMethodFactory(ButtonState.byte3Index, 2), forKey: .right)
+            buttonFuncs.updateValue(buttonMethodFactory(ButtonState.byte3Index, 3), forKey: .left)
 
-            if controller == Controller.joyconL {
-                buttonFuncs.updateValue(buttonMethodFactory(ButtonState.byte3Index, 4), forKey: ControllerButton.sr)
-                buttonFuncs.updateValue(buttonMethodFactory(ButtonState.byte3Index, 5), forKey: ControllerButton.sl)
+            if controller == .joyconL {
+                buttonFuncs.updateValue(buttonMethodFactory(ButtonState.byte3Index, 4), forKey: .sr)
+                buttonFuncs.updateValue(buttonMethodFactory(ButtonState.byte3Index, 5), forKey: .sl)
             }
-            buttonFuncs.updateValue(buttonMethodFactory(ButtonState.byte3Index, 6), forKey: ControllerButton.l)
-            buttonFuncs.updateValue(buttonMethodFactory(ButtonState.byte3Index, 7), forKey: ControllerButton.zl)
+            buttonFuncs.updateValue(buttonMethodFactory(ButtonState.byte3Index, 6), forKey: .l)
+            buttonFuncs.updateValue(buttonMethodFactory(ButtonState.byte3Index, 7), forKey: .zl)
         }
     }
 

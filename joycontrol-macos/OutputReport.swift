@@ -11,7 +11,7 @@ class OutputReport: CustomDebugStringConvertible {
     private var data: Bytes
 
     var debugDescription: String {
-        let (info, bytes) = (getOutputReportId() == OutputReportID.subCommand) ? (String(getSubCommand().rawValue), data.debugDescription) : ("", "")
+        let (info, bytes) = (getOutputReportId() == .subCommand) ? (String(getSubCommand().rawValue), data.debugDescription) : ("", "")
 
         return "Output \(getOutputReportId()) \(info)\n\(bytes)"
     }
@@ -48,7 +48,7 @@ class OutputReport: CustomDebugStringConvertible {
 
     func getSubCommand() -> SubCommand {
         if data.count < 12 {
-            return SubCommand.none
+            return .none
         }
         return SubCommand(rawValue: data[11])!
     }
@@ -82,8 +82,8 @@ class OutputReport: CustomDebugStringConvertible {
         if tempOffset + Int(size) > 0x80000 {
             throw ArgumentError.invalid("Given address range exceeds max address \(0x80000 - 1)")
         }
-        setOutputReportId(OutputReportID.subCommand)
-        setSubCommand(SubCommand.spiFlashRead)
+        setOutputReportId(.subCommand)
+        setSubCommand(.spiFlashRead)
         // write offset to data
         for index in 12 ... 15 {
             data[index] = Byte(tempOffset % 0x100)

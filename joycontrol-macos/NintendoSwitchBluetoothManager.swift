@@ -154,7 +154,7 @@ class NintendoSwitchBluetoothManager: NSObject, IOBluetoothL2CAPChannelDelegate,
         case NintendoSwitchBluetoothManager.interruptPsm:
             logger.info("Interrupt PSM Channel Connected")
             interruptChannel = l2capChannel
-            controllerProtocol = ControllerProtocol(controller: Controller.proController, spiFlash: try! FlashMemory(), hostAddress: hostAddress!, delegate: self, transport: l2capChannel)
+            controllerProtocol = ControllerProtocol(controller: .proController, spiFlash: try! FlashMemory(), hostAddress: hostAddress!, delegate: self, transport: l2capChannel)
             nintendoSwitch = l2capChannel.device
             deviceAddress = l2capChannel.device.addressString.split(separator: "-").joined(separator: ":")
 
