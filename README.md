@@ -30,6 +30,6 @@ Attempt to close L2CAP Channel 0x0042 for connection handle 0x0020 from process 
 ```
 
 - [ ] Extract joycontrol-specific logic into a Swift package
-- [ ] Only Pro Controller is emulated at the moment
+- [X] __UPDATE:__ Made this permanent. Won't be supporting L & R JoyCons ~~Only Pro Controller is emulated at the moment~~
 - [ ] Input Report frequency is limited at the moment
 - [ ] Add control stick support to UI

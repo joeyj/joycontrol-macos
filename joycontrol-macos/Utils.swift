@@ -12,15 +12,10 @@ typealias Byte = UInt8
 typealias Bytes = [Byte]
 
 enum Controller: Byte {
-    case joyconL = 0x01,
-         joyconR = 0x02,
-         proController = 0x03
+    case
+        proController = 0x03
     var name: String {
         switch self {
-        case .joyconL:
-            return "Joy-Con (L)"
-        case .joyconR:
-            return "Joy-Con (R)"
         case .proController:
             return "Pro Controller"
         }

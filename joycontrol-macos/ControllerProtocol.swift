@@ -16,25 +16,22 @@ protocol ControllerProtocolDelgate: AnyObject {
 
 class ControllerProtocol {
     private let logger = Logger()
-    let controller: Controller
     let spiFlash: FlashMemory
     let setPlayerLightsSemaphore: DispatchSemaphore
     let transport: IOBluetoothL2CAPChannel
     private var inputReportTimer: Byte
     private var inputReportMode: InputReportId?
     private let dataReceived: DispatchSemaphore
-    var controllerState: ControllerState?
+    var controllerState: ControllerState
     private var inputReportModeTimer: Timer?
     var hostAddress: BluetoothAddress
     private weak var delegate: ControllerProtocolDelgate?
     init(
-        controller: Controller,
         spiFlash: FlashMemory,
         hostAddress: BluetoothAddress,
         delegate: ControllerProtocolDelgate,
         transport: IOBluetoothL2CAPChannel
     ) {
-        self.controller = controller
         self.spiFlash = spiFlash
 
         inputReportTimer = 0x00
@@ -50,7 +47,7 @@ class ControllerProtocol {
         self.hostAddress = hostAddress
         self.delegate = delegate
         self.transport = transport
-        controllerState = ControllerState(controllerProtocol: self, controller: controller, spiFlash: spiFlash)
+        controllerState = ControllerState(spiFlash: spiFlash)
         DispatchQueue.main.async {
             self.triggerResponseFromSwitch()
         }
@@ -68,7 +65,7 @@ class ControllerProtocol {
     /// - Throws: ApplicationError.general if the connection was lost.
     func sendControllerState() {
         logger.debug(#function)
-        controllerState!.sendCompleteSemaphore.wait() // wait for a send to complete
+        controllerState.sendCompleteSemaphore.wait() // wait for a send to complete
     }
 
     /// Sets timer byte and current button state in the input report and sends it.
@@ -83,9 +80,9 @@ class ControllerProtocol {
         }
 
         // set button and stick data of input report
-        inputReport.setButtonStatus(controllerState!.buttonState.bytes())
-        let leftStick = controllerState?.leftStickState?.bytes() ?? [0x00, 0x00, 0x00]
-        let rightStick = controllerState?.rightStickState?.bytes() ?? [0x00, 0x00, 0x00]
+        inputReport.setButtonStatus(controllerState.buttonState.bytes())
+        let leftStick = controllerState.leftStickState.bytes()
+        let rightStick = controllerState.rightStickState.bytes()
         inputReport.setStickStatus(leftStick, rightStick)
 
         // set timer byte of input report
@@ -99,7 +96,7 @@ class ControllerProtocol {
             fatalError("Failed to write to transport. IOResult: \(result)")
         }
 
-        controllerState!.sendCompleteSemaphore.signal()
+        controllerState.sendCompleteSemaphore.signal()
     }
 
     func connectionLost() {

@@ -39,7 +39,7 @@ enum InputReportFactory {
     }
 
     private static func requestDeviceInfo(inputReport: InputReport, _ data: ControllerProtocol, _: Bytes) {
-        inputReport.sub0x02DeviceInfo(mac: data.hostAddress.bytes, controller: data.controller)
+        inputReport.sub0x02DeviceInfo(mac: data.hostAddress.bytes, controller: .proController)
     }
 
     private static func setShipmentState(inputReport: InputReport, _: ControllerProtocol, _: Bytes) {
@@ -63,18 +63,12 @@ enum InputReportFactory {
         try! inputReport.sub0x10SpiFlashRead(offset, spiFlashData)
     }
 
-    private static func triggerButtonsElapsedTime(inputReport: InputReport, _ data: ControllerProtocol, _: Bytes) {
+    private static func triggerButtonsElapsedTime(inputReport: InputReport, _: ControllerProtocol, _: Bytes) {
         inputReport.setAck(0x83)
         inputReport.replyToSubCommandId(.triggerButtonsElapsedTime)
         // Hack: We assume this command is only used during pairing - Set values so the Switch assigns a player number
-        if data.controller == .proController {
-            try! inputReport.sub0x04TriggerButtonsElapsedTime(LMs: 3_000, RMs: 3_000)
-        } else if [.joyconL, .joyconR].contains(data.controller) {
-            // TODO: What do we do if we want to pair a combined JoyCon?
-            try! inputReport.sub0x04TriggerButtonsElapsedTime(SLMs: 3_000, SRMs: 3_000)
-        } else {
-            fatalError("Unexpected controller: \(String(describing: data.controller))")
-        }
+
+        try! inputReport.sub0x04TriggerButtonsElapsedTime(LMs: 3_000, RMs: 3_000)
     }
 
     private static func enable6axisSensor(inputReport: InputReport, _: ControllerProtocol, _: Bytes) {

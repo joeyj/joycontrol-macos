@@ -38,6 +38,7 @@ class StickState {
     private let calibration: StickCalibration
     init(calibration: StickCalibration) {
         self.calibration = calibration
+        setCenter()
     }
 
     private func validate(_ val: Byte) throws {
@@ -65,44 +66,89 @@ class StickState {
     }
 
     func setCenter() {
-        let calibration = getCalibration()
+        setVCenter()
+        setHCenter()
+    }
+
+    func setHCenter() {
         hStick = calibration.hCenter
+    }
+
+    func setVCenter() {
         vStick = calibration.vCenter
+    }
+
+    func setVMin(force: Double = 1) {
+        vStick = Byte(force * Double(calibration.vCenter - calibration.vMaxBelowCenter))
+    }
+
+    func setVMax(force: Double = 1) {
+        vStick = Byte(force * Double(calibration.vCenter + calibration.vMaxAboveCenter))
+    }
+
+    func setHMin(force: Double = 1) {
+        hStick = Byte(force * Double(calibration.hCenter - calibration.hMaxBelowCenter))
+    }
+
+    func setHMax(force: Double = 1) {
+        hStick = Byte(force * Double(calibration.hCenter + calibration.hMaxAboveCenter))
     }
 
     func isCenter(radius: Byte = 0) -> Bool {
-        let calibration = getCalibration()
-
-        return calibration.hCenter - radius <= hStick && hStick <= calibration.hCenter + radius
+        calibration.hCenter - radius <= hStick && hStick <= calibration.hCenter + radius
             && calibration.vCenter - radius <= vStick && vStick <= calibration.vCenter + radius
     }
 
-    func setUp() {
-        let calibration = getCalibration()
-        hStick = calibration.hCenter
-        vStick = calibration.vCenter + calibration.vMaxAboveCenter
+    func setPosition(_ direction: StickDirection, _ force: Double = 1) {
+        switch direction {
+        case .top:
+            setUp(force: force)
+
+        case .topRight:
+            setHMax(force: force)
+            setVMax(force: force)
+
+        case .right:
+            setRight(force: force)
+
+        case .bottomRight:
+            setHMax(force: force)
+            setVMin(force: force)
+
+        case .bottom:
+            setDown(force: force)
+
+        case .bottomLeft:
+            setHMin(force: force)
+            setVMin(force: force)
+
+        case .left:
+            setLeft(force: force)
+
+        case .topLeft:
+            setHMin(force: force)
+            setVMax(force: force)
+        }
     }
 
-    func setDown() {
-        let calibration = getCalibration()
-        hStick = calibration.hCenter
-        vStick = calibration.vCenter - calibration.vMaxBelowCenter
+    func setUp(force: Double = 1) {
+        setHCenter()
+        setVMax(force: force)
     }
 
-    func setLeft() {
-        let calibration = getCalibration()
-        hStick = calibration.hCenter - calibration.hMaxBelowCenter
-        vStick = calibration.vCenter
+    func setDown(force: Double = 1) {
+        setHCenter()
+        setVMin(force: force)
     }
 
-    func setRight() {
-        let calibration = getCalibration()
-        hStick = calibration.hCenter + calibration.hMaxAboveCenter
-        vStick = calibration.vCenter
+    func setLeft(force: Double = 1) {
+        setHMin(force: force)
+        setVCenter()
     }
 
-    func getCalibration() -> StickCalibration {
-        calibration
+    func setRight(force: Double = 1) {
+        setHMax(force: force)
+        setVCenter()
     }
 
     func bytes() -> Bytes {
@@ -117,58 +163,25 @@ class StickState {
 
 struct ControllerState {
     private let logger = Logger()
-    private let controllerProtocol: ControllerProtocol
-    private let controller: Controller
     private let spiFlash: FlashMemory
     let buttonState: ButtonState
-    let leftStickState: StickState?
-    let rightStickState: StickState?
+    let leftStickState: StickState
+    let rightStickState: StickState
     let sendCompleteSemaphore = DispatchSemaphore(value: 0)
-    init(controllerProtocol: ControllerProtocol, controller: Controller, spiFlash: FlashMemory) {
-        self.controllerProtocol = controllerProtocol
-        self.controller = controller
+    init(spiFlash: FlashMemory) {
         self.spiFlash = spiFlash
 
-        buttonState = ButtonState(controller)
+        buttonState = ButtonState()
 
-        if [.proController, .joyconL].contains(controller) {
-            let calibrationData = spiFlash.getUserLStickCalibration() ?? spiFlash.getFactoryLStickCalibration()
+        let leftStickCalibrationData = spiFlash.getUserLStickCalibration() ?? spiFlash.getFactoryLStickCalibration()
 
-            let calibration = StickCalibration(calibrationData)
+        let leftStickCalibration = StickCalibration(leftStickCalibrationData)
 
-            leftStickState = StickState(calibration: calibration)
-            leftStickState!.setCenter()
-        } else {
-            leftStickState = nil
-        }
+        leftStickState = StickState(calibration: leftStickCalibration)
+        let rightStickCalibrationData = spiFlash.getUserRStickCalibration() ?? spiFlash.getFactoryRStickCalibration()
 
-        if [.proController, .joyconR].contains(controller) {
-            let calibrationData = spiFlash.getUserRStickCalibration() ?? spiFlash.getFactoryRStickCalibration()
+        let rightStickCalibration = StickCalibration(rightStickCalibrationData)
 
-            let calibration = StickCalibration(calibrationData)
-
-            rightStickState = StickState(calibration: calibration)
-            rightStickState!.setCenter()
-        } else {
-            rightStickState = nil
-        }
-    }
-
-    func getController() -> Controller {
-        controller
-    }
-
-    func getFlashMemory() -> FlashMemory? {
-        spiFlash
-    }
-
-    /// Invokes protocol.sendControllerState(). Returns after the controller state was sent.
-    func send() {
-        controllerProtocol.sendControllerState()
-    }
-
-    /// Waits until the switch is paired with the controller and accepts button commands
-    func connect() {
-        controllerProtocol.setPlayerLightsSemaphore.wait()
+        rightStickState = StickState(calibration: rightStickCalibration)
     }
 }

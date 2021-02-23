@@ -26,73 +26,83 @@ struct ContentView: View {
     @AppStorage("deviceAddress") private var deviceAddress: String = ""
     @ObservedObject var bluetoothManager = NintendoSwitchBluetoothManager.shared
     var body: some View {
-        VStack {
-            Toggle("Allow Pairing", isOn: $toggleAllowPairing)
-                .onChange(of: toggleAllowPairing) { value in
-                    setAllowPairing(value)
-                }
-            Text("Nintendo Switch Device Address:")
-            TextField("Nintendo Switch Device Address", text: $deviceAddress)
-                .frame(width: 170, height: 22, alignment: .center)
-            HStack {
-                Button("Connect") {
-                    bluetoothManager.connectNintendoSwitch($deviceAddress.wrappedValue)
-                }
-                Button("Disconnect") {
-                    bluetoothManager.disconnectNintendoSwitch()
-                }
-            }
-            HStack(spacing: 120) {
+        HStack {
+            VStack {
                 controllerButton(.zl)
-                controllerButton(.zr)
-            }
-            HStack(spacing: 120) {
                 controllerButton(.l)
-                controllerButton(.r)
-            }
-            HStack(spacing: 100) {
-                controllerButton(.minus)
-                controllerButton(.plus)
-            }
-            HStack(spacing: 60) {
+                HStack(alignment: .center) {
+                    Spacer()
+                    controllerButton(.minus, "-")
+                }
                 controlStickView(.leftStick)
+                    .padding(.bottom)
                 VStack {
-                    controllerButton(.x)
-                    HStack(content: {
-                        controllerButton(.y)
-                        controllerButton(.a)
-                    })
-                    controllerButton(.b)
-                }
-            }
-            HStack(spacing: 60) {
-                VStack {
-                    controllerButton(.up)
-                    HStack {
-                        controllerButton(.left)
-                        controllerButton(.right)
+                    controllerButton(.up, "↑")
+                    HStack(spacing: 26) {
+                        controllerButton(.left, "←")
+                        controllerButton(.right, "→")
                     }
-                    controllerButton(.down)
+                    controllerButton(.down, "↓")
                 }
-                controlStickView(.rightStick)
+                .padding(.bottom)
+                HStack(alignment: .center) {
+                    Spacer()
+                    controllerButton(.capture, "◍")
+                }
             }
-            HStack(spacing: 60) {
-                controllerButton(.capture)
-                controllerButton(.home)
+            VStack {
+                Toggle("Allow Pairing", isOn: $toggleAllowPairing)
+                    .onChange(of: toggleAllowPairing) { value in
+                        setAllowPairing(value)
+                    }
+                Text("Nintendo Switch Device Address:")
+                TextField("Nintendo Switch Device Address", text: $deviceAddress)
+                    .frame(width: 170, height: 22, alignment: .center)
+                HStack {
+                    Button("Connect") {
+                        bluetoothManager.connectNintendoSwitch($deviceAddress.wrappedValue)
+                    }
+                    Button("Disconnect") {
+                        bluetoothManager.disconnectNintendoSwitch()
+                    }
+                }
+            }
+            .padding(.horizontal)
+            VStack { controllerButton(.zr)
+                controllerButton(.r)
+                HStack(alignment: .center) {
+                    controllerButton(.plus, "+")
+                    Spacer()
+                }
+                VStack {
+                    controllerButton(.x, "X")
+                    HStack(spacing: 26) {
+                        controllerButton(.y, "Y")
+                        controllerButton(.a, "A")
+                    }
+                    controllerButton(.b, "B")
+                }
+                .padding(.bottom)
+                controlStickView(.rightStick)
+                    .padding(.bottom)
+                HStack(alignment: .center) {
+                    controllerButton(.home, "⌂")
+                    Spacer()
+                }
             }
         }
-        .padding()
         .toggleStyle(SwitchToggleStyle())
         .onReceive(Just(bluetoothManager), perform: { output in
             if deviceAddress.isEmpty {
                 deviceAddress = output.deviceAddress
             }
         })
+        .frame(width: 580, height: 340)
     }
 
     @ViewBuilder
-    private func controllerButton(_ title: ControllerButton) -> some View {
-        Button(title.rawValue) {
+    private func controllerButton(_ title: ControllerButton, _ text: String? = nil) -> some View {
+        Button(text ?? title.rawValue) {
             bluetoothManager.controllerButtonPushed(buttons: [title])
         }
     }
@@ -101,26 +111,29 @@ struct ContentView: View {
     private func controlStickView(_ button: ControllerButton) -> some View {
         VStack {
             HStack {
-                controlStickDirectionButton(.topLeft)
-                controlStickDirectionButton(.top)
-                controlStickDirectionButton(.topRight)
+                controlStickDirectionButton(.topLeft, button)
+                controlStickDirectionButton(.top, button)
+                controlStickDirectionButton(.topRight, button)
             }
             HStack {
-                controlStickDirectionButton(.left)
+                controlStickDirectionButton(.left, button)
                 controllerButton(button)
-                controlStickDirectionButton(.right)
+                controlStickDirectionButton(.right, button)
             }
             HStack {
-                controlStickDirectionButton(.bottomLeft)
-                controlStickDirectionButton(.bottom)
-                controlStickDirectionButton(.bottomRight)
+                controlStickDirectionButton(.bottomLeft, button)
+                controlStickDirectionButton(.bottom, button)
+                controlStickDirectionButton(.bottomRight, button)
             }
         }
+        .padding(.bottom)
     }
 
     @ViewBuilder
-    private func controlStickDirectionButton(_ direction: StickDirection) -> some View {
-        Button(action: {}, label: {
+    private func controlStickDirectionButton(_ direction: StickDirection, _ button: ControllerButton) -> some View {
+        Button(action: {
+            bluetoothManager.controlStickPushed(button, direction)
+        }, label: {
             Text("↑").rotationEffect(.degrees(Double(direction.rawValue * 45)))
         })
     }

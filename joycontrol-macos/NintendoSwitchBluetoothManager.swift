@@ -110,6 +110,19 @@ class NintendoSwitchBluetoothManager: NSObject, IOBluetoothL2CAPChannelDelegate,
         }
     }
 
+    func controlStickPushed(_ button: ControllerButton, _ direction: StickDirection) {
+        switch button {
+        case .leftStick:
+            controllerProtocol?.controllerState.leftStickState.setPosition(direction)
+
+        case .rightStick:
+            controllerProtocol?.controllerState.rightStickState.setPosition(direction)
+
+        default:
+            fatalError("Only \(ControllerButton.leftStick) and \(ControllerButton.rightStick) are supported.")
+        }
+    }
+
     private func openL2CAPChannelOrFail(_ device: IOBluetoothDevice, _ psm: BluetoothL2CAPPSM, _ channel: AutoreleasingUnsafeMutablePointer<IOBluetoothL2CAPChannel?>!) {
         let result = device.openL2CAPChannelSync(channel, withPSM: psm, delegate: self)
         guard result == kIOReturnSuccess else { // if timeout, show dialog instead of fatalError?
@@ -154,7 +167,7 @@ class NintendoSwitchBluetoothManager: NSObject, IOBluetoothL2CAPChannelDelegate,
         case NintendoSwitchBluetoothManager.interruptPsm:
             logger.info("Interrupt PSM Channel Connected")
             interruptChannel = l2capChannel
-            controllerProtocol = ControllerProtocol(controller: .proController, spiFlash: try! FlashMemory(), hostAddress: hostAddress!, delegate: self, transport: l2capChannel)
+            controllerProtocol = ControllerProtocol(spiFlash: try! FlashMemory(), hostAddress: hostAddress!, delegate: self, transport: l2capChannel)
             nintendoSwitch = l2capChannel.device
             deviceAddress = l2capChannel.device.addressString.split(separator: "-").joined(separator: ":")
 
@@ -199,7 +212,7 @@ class NintendoSwitchBluetoothManager: NSObject, IOBluetoothL2CAPChannelDelegate,
         }
         logger.debug(#function)
         logger.info("\(String(describing: buttons))")
-        buttonPush(controllerState: controllerProtocol!.controllerState!, buttons: buttons)
+        buttonPush(controllerProtocol!.controllerState.buttonState, controllerProtocol!, buttons)
     }
 
     deinit {
