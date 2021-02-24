@@ -17,8 +17,8 @@ protocol ControllerProtocolDelgate: AnyObject {
 class ControllerProtocol {
     private let logger = Logger()
     let spiFlash: FlashMemory
-    let setPlayerLightsSemaphore: DispatchSemaphore
-    let transport: IOBluetoothL2CAPChannel
+    let readyToAcceptInput: DispatchSemaphore
+    private let transport: IOBluetoothL2CAPChannel
     private var inputReportTimer: Byte
     private var inputReportMode: InputReportId?
     private let dataReceived: DispatchSemaphore
@@ -42,8 +42,7 @@ class ControllerProtocol {
         inputReportMode = nil
         inputReportModeTimer = nil
 
-        // This event gets triggered once the Switch assigns a player number to the controller and accepts user inputs
-        setPlayerLightsSemaphore = DispatchSemaphore(value: 0)
+        readyToAcceptInput = DispatchSemaphore(value: 0)
         self.hostAddress = hostAddress
         self.delegate = delegate
         self.transport = transport
@@ -56,7 +55,7 @@ class ControllerProtocol {
     private func triggerResponseFromSwitch() {
         logger.debug(#function)
         for _ in 1 ... 10 {
-            let emptyInputReport = try! InputReport()
+            let emptyInputReport = EmptyInputReport()
             write(emptyInputReport)
         }
     }
@@ -106,29 +105,6 @@ class ControllerProtocol {
         delegate?.controllerProtocolConnectionLost()
     }
 
-    @objc
-    func sendInputReport() {
-        logger.debug(#function)
-        let inputReport = try! InputReport()
-        inputReport.setVibratorInput()
-        inputReport.setMisc()
-        if inputReportMode == nil {
-            fatalError("Input report mode != set.")
-        }
-        inputReport.setInputReportId(inputReportMode!)
-
-        // write IMU input report.
-        // TODO: set some sensor data
-        inputReport.set6axisData()
-
-        // TODO: NFC - set nfc data
-        if inputReport.getInputReportId() == .setNfcData {
-            return
-        }
-
-        write(inputReport)
-    }
-
     private func inputReportModeFull() {
         logger.debug(#function)
         if inputReportModeTimer != nil {
@@ -144,7 +120,9 @@ class ControllerProtocol {
                     // don't send reports too closely together
                     return
                 }
-                self.sendInputReport()
+                let inputReport = IMUInputReport()
+
+                self.write(inputReport)
                 lastSent = Date()
             }
         }
@@ -174,30 +152,25 @@ class ControllerProtocol {
 
         let subCommandData = report.getSubCommandData()!
 
-        switch subCommand {
-        case .setInputReportMode:
-            commandSetInputReportMode(subCommandData) // TODO: when to stop input report mode?
-
-        case .setPlayerLights:
-            commandSetPlayerLights(subCommandData)
-
-        case .setHCIState:
+        if subCommand == .setInputReportMode {
+            commandSetInputReportMode(subCommandData)
+        } else if subCommand == .setPlayerLights {
+            readyToAcceptInput.signal()
+        } else if subCommand == .setHCIState {
             // assume Nintendo Switch is going to sleep
             connectionLost()
-
-        default:
-
-            let inputReportFactory = InputReportFactory.fromSubCommand(subCommand, subCommandData)
-
-            guard inputReportFactory != nil else {
-                logger.debug("Unable to create InputReport from SubCommand: \(String(describing: subCommand))")
-                return
-            }
-
-            let inputReport = inputReportFactory!(self)
-
-            write(inputReport)
         }
+
+        let inputReportFactory = InputReportFactory.fromSubCommand(subCommand, subCommandData)
+
+        guard inputReportFactory != nil else {
+            logger.debug("Unable to create InputReport from SubCommand: \(String(describing: subCommand))")
+            return
+        }
+
+        let inputReport = inputReportFactory!(self)
+
+        write(inputReport)
     }
 
     private func commandSetInputReportMode(_ subCommandData: Bytes) {
@@ -207,7 +180,7 @@ class ControllerProtocol {
             logger.info("Already in input report mode \(debugDesc) - ignoring request")
         }
         // Start input report reader
-        if [.imu, .setNfcData].contains(requestedInputReportMode) {
+        if requestedInputReportMode == .imu {
             inputReportModeFull()
         } else {
             let debugDesc = String(describing: requestedInputReportMode)
@@ -217,25 +190,6 @@ class ControllerProtocol {
 
         logger.info("Setting input report mode to \(String(describing: requestedInputReportMode))...")
         inputReportMode = requestedInputReportMode
-
-        // Send acknowledgement
-        let inputReport = createStandardInputReport()
-
-        inputReport.setAck(0x80)
-        inputReport.replyToSubCommandId(.setInputReportMode)
-
-        write(inputReport)
-    }
-
-    private func commandSetPlayerLights(_: Bytes) {
-        let inputReport = createStandardInputReport()
-
-        inputReport.setAck(0x80)
-        inputReport.replyToSubCommandId(.setPlayerLights)
-
-        write(inputReport)
-
-        setPlayerLightsSemaphore.signal()
     }
 
     deinit {}

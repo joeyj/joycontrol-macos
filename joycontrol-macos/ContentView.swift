@@ -50,7 +50,7 @@ struct ContentView: View {
                     Spacer()
                     controllerButton(.capture, "◍")
                 }
-            }
+            }.disabled(!bluetoothManager.readyForInput)
             VStack {
                 Toggle("Allow Pairing", isOn: $toggleAllowPairing)
                     .onChange(of: toggleAllowPairing) { value in
@@ -58,14 +58,15 @@ struct ContentView: View {
                     }
                 Text("Nintendo Switch Device Address:")
                 TextField("Nintendo Switch Device Address", text: $deviceAddress)
+                    .disabled(bluetoothManager.readyForInput)
                     .frame(width: 170, height: 22, alignment: .center)
                 HStack {
                     Button("Connect") {
                         bluetoothManager.connectNintendoSwitch($deviceAddress.wrappedValue)
-                    }
+                    }.disabled(bluetoothManager.readyForInput)
                     Button("Disconnect") {
                         bluetoothManager.disconnectNintendoSwitch()
-                    }
+                    }.disabled(!bluetoothManager.readyForInput)
                 }
             }
             .padding(.horizontal)
@@ -90,7 +91,7 @@ struct ContentView: View {
                     controllerButton(.home, "⌂")
                     Spacer()
                 }
-            }
+            }.disabled(!bluetoothManager.readyForInput)
         }
         .toggleStyle(SwitchToggleStyle())
         .onReceive(Just(bluetoothManager), perform: { output in

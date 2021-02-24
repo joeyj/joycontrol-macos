@@ -28,6 +28,7 @@ class NintendoSwitchBluetoothManager: NSObject, IOBluetoothL2CAPChannelDelegate,
     private var nintendoSwitch: IOBluetoothDevice?
     @objc @Published var deviceAddress: String = ""
     private var connected: Bool = false
+    @objc @Published var readyForInput: Bool = false
 
     override private init() {
         super.init()
@@ -56,6 +57,7 @@ class NintendoSwitchBluetoothManager: NSObject, IOBluetoothL2CAPChannelDelegate,
         nintendoSwitch = nil
         interruptChannelOutgoing = nil
         controlChannelOutgoing = nil
+        readyForInput = false
     }
 
     private func configureHostControllerForNintendoSwitch() {
@@ -143,7 +145,7 @@ class NintendoSwitchBluetoothManager: NSObject, IOBluetoothL2CAPChannelDelegate,
     }
 
     func l2capChannelData(_ l2capChannel: IOBluetoothL2CAPChannel!, data dataPointer: UnsafeMutableRawPointer!, length dataLength: Int) {
-        if l2capChannel == controllerProtocol?.transport {
+        if l2capChannel.psm == Self.interruptPsm {
             let data = getDataFromChannel(data: dataPointer, length: dataLength)
             controllerProtocol?.reportReceived(data)
         } else {
@@ -170,6 +172,12 @@ class NintendoSwitchBluetoothManager: NSObject, IOBluetoothL2CAPChannelDelegate,
             controllerProtocol = ControllerProtocol(spiFlash: try! FlashMemory(), hostAddress: hostAddress!, delegate: self, transport: l2capChannel)
             nintendoSwitch = l2capChannel.device
             deviceAddress = l2capChannel.device.addressString.split(separator: "-").joined(separator: ":")
+            DispatchQueue.global(qos: .background).async {
+                self.controllerProtocol!.readyToAcceptInput.wait()
+                DispatchQueue.main.async {
+                    self.readyForInput = true
+                }
+            }
 
         default:
             return
