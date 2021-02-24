@@ -21,7 +21,7 @@ enum StickDirection: Int {
          center = -2
 }
 
-let buttonToText: [ControllerButton: String] = [
+private let kControllerButtonToText: [ControllerButton: String] = [
     .leftStick: "🅛",
     .rightStick: "🅡",
     .minus: "-",
@@ -120,12 +120,12 @@ struct ContentView: View {
                 deviceAddress = output.deviceAddress
             }
         })
-        .frame(width: 580, height: 460)
+        .frame(width: 500, height: 460)
     }
 
     @ViewBuilder
     private func controllerButton(_ title: ControllerButton) -> some View {
-        customButton(buttonToText[title] ?? title.rawValue) {
+        customButton(kControllerButtonToText[title] ?? title.rawValue) {
             if title == .leftStick || title == .rightStick {
                 bluetoothManager.controlStickPushed(title, .center)
             }
