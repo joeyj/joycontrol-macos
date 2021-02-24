@@ -17,7 +17,8 @@ enum StickDirection: Int {
          topRight = 1,
          bottomRight = 3,
          bottomLeft = 5,
-         topLeft = -1
+         topLeft = -1,
+         center = -2
 }
 
 struct ContentView: View {
@@ -103,6 +104,9 @@ struct ContentView: View {
     @ViewBuilder
     private func controllerButton(_ title: ControllerButton, _ text: String? = nil) -> some View {
         Button(text ?? title.rawValue) {
+            if title == .leftStick || title == .rightStick {
+                bluetoothManager.controlStickPushed(title, .center)
+            }
             bluetoothManager.controllerButtonPushed(buttons: [title])
         }
     }

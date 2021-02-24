@@ -89,7 +89,7 @@ class ControllerProtocol {
         inputReport.setTimer(inputReportTimer)
         let newTimerValue = UInt16(inputReportTimer) + UInt16(1)
         inputReportTimer = Byte(newTimerValue > Byte.max ? 0 : newTimerValue)
-        logger.info("new inputReportTimer value: \(self.inputReportTimer)")
+        logger.debug("\(inputReport.debugDescription)")
         var bytes = inputReport.bytes()
         let result = transport.writeSync(&bytes, length: UInt16(bytes.count))
         guard result == kIOReturnSuccess else {

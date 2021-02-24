@@ -7,6 +7,8 @@
 
 import Bluetooth
 import Foundation
+import os.log
+
 private let kDefaultInputReportData = [0xA1] + Bytes(repeating: 0x00, count: 361)
 func createStandardInputReport() -> InputReport {
     let inputReport = try! InputReport()
@@ -121,19 +123,16 @@ enum InputReportFactory {
 /// https://github.com/dekuNukem/NintendoSwitchReverseEngineering/blob/master/bluetoothHidNotes.md
 class InputReport: CustomDebugStringConvertible {
     var data: Bytes
+    let logger = Logger()
 
     var debugDescription: String {
-        let reportId = "Input \(getInputReportId())"
-        let subCommand: SubCommand
-        let bytesDescription: String
-        if getInputReportId() == .standard {
-            subCommand = getReplyToSubCommandId()
-            bytesDescription = bytes().debugDescription
-        } else {
-            subCommand = .none
-            bytesDescription = ""
+        let reportId = getInputReportId()
+        var result = "Input mode:\(reportId)"
+        if reportId == .standard {
+            result.append("subCommand:\(String(describing: getReplyToSubCommandId()))")
         }
-        return "\(reportId) \(subCommand)\n\(bytesDescription)"
+        result.append("\n\(bytes().debugDescription)")
+        return result
     }
 
     init(_ data: Bytes? = nil) throws {
@@ -203,7 +202,7 @@ class InputReport: CustomDebugStringConvertible {
         if leftStickBytes.count != 3 {
             throw ArgumentError.invalid("Left stick status data must be exactly 3 bytes!")
         }
-        data.replaceSubrange(8 ... 10, with: leftStickBytes)
+        data.replaceSubrange(7 ... 9, with: leftStickBytes)
     }
 
     /// - Parameter rightStickBytes: 3 bytes
@@ -211,7 +210,7 @@ class InputReport: CustomDebugStringConvertible {
         if rightStickBytes.count != 3 {
             throw ArgumentError.invalid("Right stick status data must be exactly 3 bytes!")
         }
-        data.replaceSubrange(11 ... 13, with: rightStickBytes)
+        data.replaceSubrange(10 ... 12, with: rightStickBytes)
     }
 
     func setVibratorInput() {

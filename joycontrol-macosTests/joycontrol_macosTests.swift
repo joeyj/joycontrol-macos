@@ -20,10 +20,22 @@ class joycontrol_macosTests: XCTestCase {
     func testFlashMemoryInitsWithoutArgs() throws {
         XCTAssertNotNil { try! FlashMemory() }
     }
-    
+
     func testFlashMemoryInitsWithoutArgsUsesFactoryDefaults() throws {
         let target = try! FlashMemory()
         XCTAssertEqual(kFactoryLStickCalibration, target.getFactoryLStickCalibration())
         XCTAssertEqual(kFactoryRStickCalibration, target.getFactoryRStickCalibration())
+    }
+
+    func testLeftStickCalibrationFromFactoryBytes() throws {
+        let expected: [UInt16] = [2048, 2048, 1792, 1792, 1792, 1792]
+        let result = StickCalibration.fromLeftStick(kFactoryLStickCalibration)
+        XCTAssertEqual(expected, result.bytes)
+    }
+
+    func testRightStickCalibrationFromFactoryBytes() throws {
+        let expected: [UInt16] = [2048, 2048, 1792, 1792, 1792, 1792]
+        let result = StickCalibration.fromRightStick(kFactoryRStickCalibration)
+        XCTAssertEqual(expected, result.bytes)
     }
 }

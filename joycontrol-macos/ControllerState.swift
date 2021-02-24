@@ -9,12 +9,18 @@ import Foundation
 import os.log
 
 struct StickCalibration: CustomDebugStringConvertible {
-    let hCenter: Byte
-    let vCenter: Byte
-    let hMaxAboveCenter: Byte
-    let vMaxAboveCenter: Byte
-    let hMaxBelowCenter: Byte
-    let vMaxBelowCenter: Byte
+    let hCenter: UInt16
+    let vCenter: UInt16
+    let hMaxAboveCenter: UInt16
+    let vMaxAboveCenter: UInt16
+    let hMaxBelowCenter: UInt16
+    let vMaxBelowCenter: UInt16
+
+    var bytes: [UInt16] {
+        [
+            hCenter, vCenter, hMaxAboveCenter, vMaxAboveCenter, hMaxBelowCenter, vMaxBelowCenter
+        ]
+    }
 
     var debugDescription: String {
         "hCenter:\(hCenter) vCenter:\(vCenter) hMaxAboveCenter:\(hMaxAboveCenter) " +
@@ -22,46 +28,87 @@ struct StickCalibration: CustomDebugStringConvertible {
             "vMaxBelowCenter:\(vMaxBelowCenter)"
     }
 
-    init(_ bytesLength9: Bytes) {
-        hMaxAboveCenter = Byte(UInt16(bytesLength9[1] << 8) & 0xF00 | UInt16(bytesLength9[0]))
-        vMaxAboveCenter = Byte((bytesLength9[2] << 4) | (bytesLength9[1] >> 4))
-        hCenter = Byte(UInt16(bytesLength9[4] << 8) & 0xF00 | UInt16(bytesLength9[3]))
-        vCenter = Byte((bytesLength9[5] << 4) | (bytesLength9[4] >> 4))
-        hMaxBelowCenter = Byte(UInt16(bytesLength9[7] << 8) & 0xF00 | UInt16(bytesLength9[6]))
-        vMaxBelowCenter = Byte((bytesLength9[8] << 4) | (bytesLength9[7] >> 4))
+    private init(
+        hCenter: UInt16,
+        vCenter: UInt16,
+        hMaxAboveCenter: UInt16,
+        vMaxAboveCenter: UInt16,
+        hMaxBelowCenter: UInt16,
+        vMaxBelowCenter: UInt16
+    ) {
+        self.hCenter = hCenter
+        self.vCenter = vCenter
+        self.hMaxAboveCenter = hMaxAboveCenter
+        self.vMaxAboveCenter = vMaxAboveCenter
+        self.hMaxBelowCenter = hMaxBelowCenter
+        self.vMaxBelowCenter = vMaxBelowCenter
+    }
+
+    static func fromLeftStick(_ bytesLength9: Bytes) -> StickCalibration {
+        let hMaxAboveCenter = (UInt16(bytesLength9[1]) << 8) & 0xF00 | UInt16(bytesLength9[0])
+        let vMaxAboveCenter = (UInt16(bytesLength9[2]) << 4) | (UInt16(bytesLength9[1]) >> 4)
+        let hCenter = (UInt16(bytesLength9[4]) << 8) & 0xF00 | UInt16(bytesLength9[3])
+        let vCenter = (UInt16(bytesLength9[5]) << 4) | (UInt16(bytesLength9[4]) >> 4)
+        let hMaxBelowCenter = (UInt16(bytesLength9[7]) << 8) & 0xF00 | UInt16(bytesLength9[6])
+        let vMaxBelowCenter = (UInt16(bytesLength9[8]) << 4) | (UInt16(bytesLength9[7]) >> 4)
+        return StickCalibration(
+            hCenter: hCenter,
+            vCenter: vCenter,
+            hMaxAboveCenter: hMaxAboveCenter,
+            vMaxAboveCenter: vMaxAboveCenter,
+            hMaxBelowCenter: hMaxBelowCenter,
+            vMaxBelowCenter: vMaxBelowCenter
+        )
+    }
+
+    static func fromRightStick(_ bytesLength9: Bytes) -> StickCalibration {
+        let hCenter = (UInt16(bytesLength9[1]) << 8) & 0xF00 | UInt16(bytesLength9[0])
+        let vCenter = (UInt16(bytesLength9[2]) << 4) | (UInt16(bytesLength9[1]) >> 4)
+        let hMaxBelowCenter = (UInt16(bytesLength9[4]) << 8) & 0xF00 | UInt16(bytesLength9[3])
+        let vMaxBelowCenter = (UInt16(bytesLength9[5]) << 4) | (UInt16(bytesLength9[4]) >> 4)
+        let hMaxAboveCenter = (UInt16(bytesLength9[7]) << 8) & 0xF00 | UInt16(bytesLength9[6])
+        let vMaxAboveCenter = (UInt16(bytesLength9[8]) << 4) | (UInt16(bytesLength9[7]) >> 4)
+        return StickCalibration(
+            hCenter: hCenter,
+            vCenter: vCenter,
+            hMaxAboveCenter: hMaxAboveCenter,
+            vMaxAboveCenter: vMaxAboveCenter,
+            hMaxBelowCenter: hMaxBelowCenter,
+            vMaxBelowCenter: vMaxBelowCenter
+        )
     }
 }
 
 class StickState {
-    private var hStick: Byte = 0
-    private var vStick: Byte = 0
+    private var hStick: UInt16 = 0
+    private var vStick: UInt16 = 0
     private let calibration: StickCalibration
     init(calibration: StickCalibration) {
         self.calibration = calibration
         setCenter()
     }
 
-    private func validate(_ val: Byte) throws {
-        if !(val >= 0 && val < 0xFF) {
-            throw ApplicationError.general("Stick values must be in [0,\(0xFF))")
+    private func validate(_ val: UInt16) throws {
+        if !(val >= 0 && val < 0x1000) {
+            throw ApplicationError.general("Stick values must be in [0,\(0x1000))")
         }
     }
 
-    func setH(value: Byte) {
+    func setH(value: UInt16) {
         try! validate(value)
         hStick = value
     }
 
-    func getH() -> Byte {
+    func getH() -> UInt16 {
         hStick
     }
 
-    func setV(value: Byte) {
+    func setV(value: UInt16) {
         try! validate(value)
         vStick = value
     }
 
-    func getV() -> Byte {
+    func getV() -> UInt16 {
         vStick
     }
 
@@ -79,28 +126,31 @@ class StickState {
     }
 
     func setVMin(force: Double = 1) {
-        vStick = Byte(force * Double(calibration.vCenter - calibration.vMaxBelowCenter))
+        vStick = UInt16(force * Double(calibration.vCenter - calibration.vMaxBelowCenter))
     }
 
     func setVMax(force: Double = 1) {
-        vStick = Byte(force * Double(calibration.vCenter + calibration.vMaxAboveCenter))
+        vStick = UInt16(force * Double(calibration.vCenter + calibration.vMaxAboveCenter))
     }
 
     func setHMin(force: Double = 1) {
-        hStick = Byte(force * Double(calibration.hCenter - calibration.hMaxBelowCenter))
+        hStick = UInt16(force * Double(calibration.hCenter - calibration.hMaxBelowCenter))
     }
 
     func setHMax(force: Double = 1) {
-        hStick = Byte(force * Double(calibration.hCenter + calibration.hMaxAboveCenter))
+        hStick = UInt16(force * Double(calibration.hCenter + calibration.hMaxAboveCenter))
     }
 
-    func isCenter(radius: Byte = 0) -> Bool {
+    func isCenter(radius: UInt16 = 0) -> Bool {
         calibration.hCenter - radius <= hStick && hStick <= calibration.hCenter + radius
             && calibration.vCenter - radius <= vStick && vStick <= calibration.vCenter + radius
     }
 
     func setPosition(_ direction: StickDirection, _ force: Double = 1) {
         switch direction {
+        case .center:
+            setCenter()
+
         case .top:
             setUp(force: force)
 
@@ -152,9 +202,9 @@ class StickState {
     }
 
     func bytes() -> Bytes {
-        let byte1 = 0xFF & hStick
-        let byte2 = (hStick >> 8) | ((0xF & vStick) << 4)
-        let byte3 = vStick >> 4
+        let byte1 = Byte(0xFF & hStick)
+        let byte2 = Byte((hStick >> 8) | ((0xF & vStick) << 4))
+        let byte3 = Byte(vStick >> 4)
         return [byte1, byte2, byte3]
     }
 
@@ -175,12 +225,12 @@ struct ControllerState {
 
         let leftStickCalibrationData = spiFlash.getUserLStickCalibration() ?? spiFlash.getFactoryLStickCalibration()
 
-        let leftStickCalibration = StickCalibration(leftStickCalibrationData)
+        let leftStickCalibration = StickCalibration.fromLeftStick(leftStickCalibrationData)
 
         leftStickState = StickState(calibration: leftStickCalibration)
         let rightStickCalibrationData = spiFlash.getUserRStickCalibration() ?? spiFlash.getFactoryRStickCalibration()
 
-        let rightStickCalibration = StickCalibration(rightStickCalibrationData)
+        let rightStickCalibration = StickCalibration.fromRightStick(rightStickCalibrationData)
 
         rightStickState = StickState(calibration: rightStickCalibration)
     }
