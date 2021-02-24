@@ -21,6 +21,27 @@ enum StickDirection: Int {
          center = -2
 }
 
+let buttonToText: [ControllerButton: String] = [
+    .leftStick: "🅛",
+    .rightStick: "🅡",
+    .minus: "-",
+    .up: "↑",
+    .left: "←",
+    .right: "→",
+    .down: "↓",
+    .capture: "◍",
+    .plus: "+",
+    .x: "X",
+    .y: "Y",
+    .a: "A",
+    .b: "B",
+    .home: "⌂",
+    .r: "🆁",
+    .l: "🅻",
+    .zl: "ZL",
+    .zr: "ZR"
+]
+
 struct ContentView: View {
     let logger = Logger()
     @State var toggleAllowPairing: Bool
@@ -33,22 +54,22 @@ struct ContentView: View {
                 controllerButton(.l)
                 HStack(alignment: .center) {
                     Spacer()
-                    controllerButton(.minus, "-")
+                    controllerButton(.minus)
                 }
                 controlStickView(.leftStick)
                     .padding(.bottom)
                 VStack {
-                    controllerButton(.up, "↑")
+                    controllerButton(.up)
                     HStack(spacing: 26) {
-                        controllerButton(.left, "←")
-                        controllerButton(.right, "→")
+                        controllerButton(.left)
+                        controllerButton(.right)
                     }
-                    controllerButton(.down, "↓")
+                    controllerButton(.down)
                 }
                 .padding(.bottom)
                 HStack(alignment: .center) {
                     Spacer()
-                    controllerButton(.capture, "◍")
+                    controllerButton(.capture)
                 }
             }.disabled(!bluetoothManager.readyForInput)
             VStack {
@@ -73,22 +94,22 @@ struct ContentView: View {
             VStack { controllerButton(.zr)
                 controllerButton(.r)
                 HStack(alignment: .center) {
-                    controllerButton(.plus, "+")
+                    controllerButton(.plus)
                     Spacer()
                 }
                 VStack {
-                    controllerButton(.x, "X")
+                    controllerButton(.x)
                     HStack(spacing: 26) {
-                        controllerButton(.y, "Y")
-                        controllerButton(.a, "A")
+                        controllerButton(.y)
+                        controllerButton(.a)
                     }
-                    controllerButton(.b, "B")
+                    controllerButton(.b)
                 }
                 .padding(.bottom)
                 controlStickView(.rightStick)
                     .padding(.bottom)
                 HStack(alignment: .center) {
-                    controllerButton(.home, "⌂")
+                    controllerButton(.home)
                     Spacer()
                 }
             }.disabled(!bluetoothManager.readyForInput)
@@ -99,17 +120,35 @@ struct ContentView: View {
                 deviceAddress = output.deviceAddress
             }
         })
-        .frame(width: 580, height: 340)
+        .frame(width: 580, height: 460)
     }
 
     @ViewBuilder
-    private func controllerButton(_ title: ControllerButton, _ text: String? = nil) -> some View {
-        Button(text ?? title.rawValue) {
+    private func controllerButton(_ title: ControllerButton) -> some View {
+        customButton(buttonToText[title] ?? title.rawValue) {
             if title == .leftStick || title == .rightStick {
                 bluetoothManager.controlStickPushed(title, .center)
             }
             bluetoothManager.controllerButtonPushed(buttons: [title])
         }
+    }
+
+    @ViewBuilder
+    private func customButton(_ text: String, degrees: Int = 0, action: @escaping () -> Void) -> some View {
+        Button(action: action, label: {
+            Text(text)
+                .frame(minWidth: 22)
+                .font(.system(size: 22))
+                .rotationEffect(.degrees(Double(degrees * 45)))
+                .padding(.horizontal, 3)
+        })
+
+            .buttonStyle(PlainButtonStyle())
+            .overlay(
+                RoundedRectangle(cornerRadius: 4)
+                    .stroke(Color.gray, lineWidth: 1)
+            )
+            .padding(.all, 3)
     }
 
     @ViewBuilder
@@ -136,11 +175,9 @@ struct ContentView: View {
 
     @ViewBuilder
     private func controlStickDirectionButton(_ direction: StickDirection, _ button: ControllerButton) -> some View {
-        Button(action: {
+        customButton("↑", degrees: direction.rawValue) {
             bluetoothManager.controlStickPushed(button, direction)
-        }, label: {
-            Text("↑").rotationEffect(.degrees(Double(direction.rawValue * 45)))
-        })
+        }
     }
 
     private func setAllowPairing(_ allowPairing: Bool) {
