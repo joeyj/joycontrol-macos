@@ -13,7 +13,7 @@ import os.log
 import SwiftUI
 
 class NintendoSwitchBluetoothManager: NSObject, IOBluetoothL2CAPChannelDelegate, ObservableObject, IOBluetoothHostControllerDelegate, ControllerProtocolDelgate {
-    private static let deviceName = "Pro Controller"
+    private static let deviceName = Controller.proController.name
     private static let controlPsm = BluetoothL2CAPPSM(kBluetoothL2CAPPSMHIDControl)
     private static let interruptPsm = BluetoothL2CAPPSM(kBluetoothL2CAPPSMHIDInterrupt)
     static let shared = NintendoSwitchBluetoothManager()
