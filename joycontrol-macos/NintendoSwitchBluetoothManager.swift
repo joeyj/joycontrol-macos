@@ -92,8 +92,8 @@ class NintendoSwitchBluetoothManager: NSObject, IOBluetoothL2CAPChannelDelegate,
         DispatchQueue.main.async { [self] in
             nintendoSwitch = IOBluetoothDevice(addressString: address)!
             nintendoSwitch!.openConnection()
-            openL2CAPChannelOrFail(nintendoSwitch!, NintendoSwitchBluetoothManager.controlPsm, &controlChannelOutgoing)
-            openL2CAPChannelOrFail(nintendoSwitch!, NintendoSwitchBluetoothManager.interruptPsm, &interruptChannelOutgoing)
+            nintendoSwitch!.openL2CAPChannelOrFail(NintendoSwitchBluetoothManager.controlPsm, &controlChannelOutgoing)
+            nintendoSwitch!.openL2CAPChannelOrFail(NintendoSwitchBluetoothManager.interruptPsm, &interruptChannelOutgoing)
         }
     }
 
@@ -119,28 +119,16 @@ class NintendoSwitchBluetoothManager: NSObject, IOBluetoothL2CAPChannelDelegate,
         }
     }
 
-    private func openL2CAPChannelOrFail(_ device: IOBluetoothDevice, _ psm: BluetoothL2CAPPSM, _ channel: AutoreleasingUnsafeMutablePointer<IOBluetoothL2CAPChannel?>!) {
-        let result = device.openL2CAPChannelSync(channel, withPSM: psm, delegate: self)
-        guard result == kIOReturnSuccess else { // if timeout, show dialog instead of fatalError?
-            fatalError("Failed to open l2cap channel PSM: \(psm) result: \(result)")
-        }
-    }
-
     @objc
     func newL2CAPChannelOpened(notification _: IOBluetoothUserNotification, channel: IOBluetoothL2CAPChannel) {
         logger.debug(#function)
         channel.setDelegate(self)
     }
 
-    private func getDataFromChannel(data dataPointer: UnsafeMutableRawPointer!, length dataLength: Int) -> Bytes {
-        let opaquePointer = OpaquePointer(dataPointer)
-        let unsafePointer = UnsafeMutablePointer<Byte>(opaquePointer)
-        return Array(UnsafeBufferPointer<Byte>(start: unsafePointer, count: dataLength))
-    }
-
     func l2capChannelData(_ l2capChannel: IOBluetoothL2CAPChannel!, data dataPointer: UnsafeMutableRawPointer!, length dataLength: Int) {
         if l2capChannel.psm == Self.interruptPsm {
-            let data = getDataFromChannel(data: dataPointer, length: dataLength)
+            let data: Bytes = dataPointer.readAsArray(dataLength)
+
             controllerProtocol?.reportReceived(data)
         } else {
             fatalError("Received data from non-interrupt channel.")

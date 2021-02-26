@@ -125,17 +125,34 @@ enum Utils {
     }
 }
 
+extension IOBluetoothDevice {
+    func openL2CAPChannelOrFail(_ psm: BluetoothL2CAPPSM, _ channel: AutoreleasingUnsafeMutablePointer<IOBluetoothL2CAPChannel?>!) {
+        let result = openL2CAPChannelSync(channel, withPSM: psm, delegate: self)
+        guard result == kIOReturnSuccess else { // if timeout, show dialog instead of fatalError?
+            fatalError("Failed to open l2cap channel PSM: \(psm) result: \(result)")
+        }
+    }
+}
+
 extension IOBluetoothHostController {
     func setExtendedInquiryResponse(deviceName: String, modelId: String = "", fecRequired: Bool = false) {
-    let data = HCIWriteExtendedInquiryResponseData(deviceName: deviceName, modelId: modelId, fecRequired: fecRequired)!.getTuple()
+        let data = HCIWriteExtendedInquiryResponseData(deviceName: deviceName, modelId: modelId, fecRequired: fecRequired)!.getTuple()
 
-    var response = BluetoothHCIExtendedInquiryResponse(data: data)
-    self.bluetoothHCIWriteExtendedInquiryResponse(Byte(kBluetoothHCIFECNotRequired.rawValue), in: &response)
+        var response = BluetoothHCIExtendedInquiryResponse(data: data)
+        bluetoothHCIWriteExtendedInquiryResponse(Byte(kBluetoothHCIFECNotRequired.rawValue), in: &response)
     }
 
     func isScanEnable() -> Bool {
         var readScanEnable: Int8 = 0
-        self.bluetoothHCIReadScanEnable(&readScanEnable)
+        bluetoothHCIReadScanEnable(&readScanEnable)
         return readScanEnable > 0
+    }
+}
+
+extension UnsafeMutableRawPointer {
+    func readAsArray<T>(_ dataLength: Int) -> [T] {
+        let opaquePointer = OpaquePointer(self)
+        let unsafePointer = UnsafeMutablePointer<T>(opaquePointer)
+        return Array(UnsafeBufferPointer<T>(start: unsafePointer, count: dataLength))
     }
 }
