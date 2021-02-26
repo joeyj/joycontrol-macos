@@ -13,10 +13,12 @@ import os.log
 import SwiftUI
 
 class NintendoSwitchBluetoothManager: NSObject, IOBluetoothL2CAPChannelDelegate, ObservableObject, IOBluetoothHostControllerDelegate, ControllerProtocolDelgate {
+    private static let deviceName = "Pro Controller"
     private static let controlPsm = BluetoothL2CAPPSM(kBluetoothL2CAPPSMHIDControl)
     private static let interruptPsm = BluetoothL2CAPPSM(kBluetoothL2CAPPSMHIDInterrupt)
     static let shared = NintendoSwitchBluetoothManager()
     private static let hostController = IOBluetoothHostController()
+    private static let hostControllerDefault = HostController.default!
     private var controlChannel: IOBluetoothL2CAPChannel?
     private var interruptChannel: IOBluetoothL2CAPChannel?
     private var controlChannelOutgoing: IOBluetoothL2CAPChannel?
@@ -32,22 +34,19 @@ class NintendoSwitchBluetoothManager: NSObject, IOBluetoothL2CAPChannelDelegate,
 
     override private init() {
         super.init()
-        NintendoSwitchBluetoothManager.hostController.delegate = self
+        Self.hostController.delegate = self
     }
 
     func setScanEnabled(enabled: Bool) {
         logger.debug(#function)
-        let host = HostController.default!
-        try! host.writeScanEnable(
-            scanEnable: enabled ? HCIWriteScanEnable.ScanEnable.inquiryAndPageScan
-                : HCIWriteScanEnable.ScanEnable.noScans
+        try! Self.hostControllerDefault.writeScanEnable(
+            scanEnable: enabled ? .inquiryAndPageScan
+                : .noScans
         )
     }
 
     func getIsScanEnabled() -> Bool {
-        var readScanEnable: Int8 = 0
-        NintendoSwitchBluetoothManager.hostController.bluetoothHCIReadScanEnable(&readScanEnable)
-        return readScanEnable > 0
+        Self.hostController.isScanEnable()
     }
 
     func controllerProtocolConnectionLost() {
@@ -61,11 +60,9 @@ class NintendoSwitchBluetoothManager: NSObject, IOBluetoothL2CAPChannelDelegate,
     }
 
     private func configureHostControllerForNintendoSwitch() {
-        let host = HostController.default!
-        let deviceName = "Pro Controller"
-        try! host.writeLocalName(deviceName)
+        try! Self.hostControllerDefault.writeLocalName(Self.deviceName)
 
-        let controller = NintendoSwitchBluetoothManager.hostController
+        let controller = Self.hostController
         let classNum = 0x000508
         controller.delegate = self
         controller.bluetoothHCIWriteClass(ofDevice: BluetoothClassOfDevice(classNum))
@@ -73,11 +70,8 @@ class NintendoSwitchBluetoothManager: NSObject, IOBluetoothL2CAPChannelDelegate,
         controller.bluetoothHCIWriteSimplePairingMode(Byte(kBluetoothHCISimplePairingModeEnabled.rawValue))
         controller.bluetoothHCIWriteSimplePairingDebugMode(Byte(kBluetoothHCISimplePairingDebugModeEnabled.rawValue))
 
-        let data = HCIWriteExtendedInquiryResponseData(deviceName: deviceName, modelId: "", fecRequired: false)!.getTuple()
-
-        var response = BluetoothHCIExtendedInquiryResponse(data: data)
-        controller.bluetoothHCIWriteExtendedInquiryResponse(Byte(kBluetoothHCIFECNotRequired.rawValue), in: &response)
-        hostAddress = try! host.readDeviceAddress()
+        controller.setExtendedInquiryResponse(deviceName: Self.deviceName)
+        hostAddress = try! Self.hostControllerDefault.readDeviceAddress()
         serviceRecord = addSdpRecordFromPlistOrFail(Bundle.main.path(forResource: "NintendoSwitchControllerSDP", ofType: "plist")!)
         logger.debug("\(self.serviceRecord!.debugDescription)")
         registerHIDChannelsOpen(target: self, selector: #selector(newL2CAPChannelOpened))
@@ -196,10 +190,6 @@ class NintendoSwitchBluetoothManager: NSObject, IOBluetoothL2CAPChannelDelegate,
         }
     }
 
-    func l2capChannelWriteComplete(_: IOBluetoothL2CAPChannel!, refcon _: UnsafeMutableRawPointer!, status _: IOReturn) {
-        logger.debug(#function)
-    }
-
     func bluetoothHCIEventNotificationMessage(_ controller: IOBluetoothHostController, in _: IOBluetoothHCIEventNotificationMessageRef) {
         let isConnected = controller.powerState == kBluetoothHCIPowerStateON
         if isConnected != connected {
@@ -215,11 +205,11 @@ class NintendoSwitchBluetoothManager: NSObject, IOBluetoothL2CAPChannelDelegate,
 
     func controllerButtonPushed(buttons: [ControllerButton]) {
         guard controllerProtocol != nil else {
-            logger.info("controllerProtocol not initialized")
+            logger.error("controllerProtocol not initialized")
             return
         }
         logger.debug(#function)
-        logger.info("\(String(describing: buttons))")
+        logger.debug("\(String(describing: buttons))")
         buttonPush(controllerProtocol!.controllerState.buttonState, controllerProtocol!, buttons)
     }
 

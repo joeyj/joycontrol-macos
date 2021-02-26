@@ -139,22 +139,22 @@
 		F738726025D3A2C200279B82 /* joycontrol-macos */ = {
 			isa = PBXGroup;
 			children = (
-				F73872BD25D3A3CB00279B82 /* Utils.swift */,
+				F738726525D3A2C300279B82 /* Assets.xcassets */,
+				F77BE2A125E21FC8006E1669 /* ButtonState.swift */,
 				F73872BE25D3A3CB00279B82 /* ContentView.swift */,
+				F73872C425D3A3CB00279B82 /* ControllerProtocol.swift */,
 				F73872C025D3A3CB00279B82 /* ControllerState.swift */,
 				F73872C225D3A3CB00279B82 /* FlashMemory.swift */,
 				F73872BC25D3A3CB00279B82 /* HCIWriteExtendedInquiryResponseData.swift */,
+				F738726A25D3A2C300279B82 /* Info.plist */,
 				F73872BF25D3A3CB00279B82 /* InputReport.swift */,
+				F738726B25D3A2C300279B82 /* joycontrol_macos.entitlements */,
+				F738726125D3A2C200279B82 /* JoycontrolMacosApp.swift */,
+				F70A82EC25DB4F4B00E63A8A /* NintendoSwitchBluetoothManager.swift */,
 				F73872C325D3A3CB00279B82 /* NintendoSwitchControllerSDP.plist */,
 				F73872C125D3A3CB00279B82 /* OutputReport.swift */,
-				F73872C425D3A3CB00279B82 /* ControllerProtocol.swift */,
-				F738726125D3A2C200279B82 /* JoycontrolMacosApp.swift */,
-				F738726525D3A2C300279B82 /* Assets.xcassets */,
-				F738726A25D3A2C300279B82 /* Info.plist */,
-				F738726B25D3A2C300279B82 /* joycontrol_macos.entitlements */,
 				F738726725D3A2C300279B82 /* Preview Content */,
-				F70A82EC25DB4F4B00E63A8A /* NintendoSwitchBluetoothManager.swift */,
-				F77BE2A125E21FC8006E1669 /* ButtonState.swift */,
+				F73872BD25D3A3CB00279B82 /* Utils.swift */,
 			);
 			path = "joycontrol-macos";
 			sourceTree = "<group>";

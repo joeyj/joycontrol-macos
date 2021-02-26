@@ -124,3 +124,18 @@ enum Utils {
         value ^ (1 << bit)
     }
 }
+
+extension IOBluetoothHostController {
+    func setExtendedInquiryResponse(deviceName: String, modelId: String = "", fecRequired: Bool = false) {
+    let data = HCIWriteExtendedInquiryResponseData(deviceName: deviceName, modelId: modelId, fecRequired: fecRequired)!.getTuple()
+
+    var response = BluetoothHCIExtendedInquiryResponse(data: data)
+    self.bluetoothHCIWriteExtendedInquiryResponse(Byte(kBluetoothHCIFECNotRequired.rawValue), in: &response)
+    }
+
+    func isScanEnable() -> Bool {
+        var readScanEnable: Int8 = 0
+        self.bluetoothHCIReadScanEnable(&readScanEnable)
+        return readScanEnable > 0
+    }
+}

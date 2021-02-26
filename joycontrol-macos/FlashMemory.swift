@@ -7,15 +7,25 @@
 
 import Foundation
 
+let kBlankByte: Byte = 0xFF
 let kFactoryLStickCalibration: Bytes = [0x00, 0x07, 0x70, 0x00, 0x08, 0x80, 0x00, 0x07, 0x70]
 let kFactoryRStickCalibration: Bytes = [0x00, 0x08, 0x80, 0x00, 0x07, 0x70, 0x00, 0x07, 0x70]
-let kDefaultFlashMemory = Bytes(repeating: 0xFF, count: 0x603D) // Blank data is all 0xFF
+let kDefaultFlashMemory = Bytes(repeating: kBlankByte, count: 0x603D)
     + kFactoryLStickCalibration
     + kFactoryRStickCalibration
-    + Bytes(repeating: 0xFF, count: 0x80000 - 0x604E - 1)
+    + Bytes(repeating: kBlankByte, count: 0x80000 - 0x604E - 1)
 
 class FlashMemory {
     let data: Bytes
+
+    private var isUserLStickCalibrationDataAvailable: Bool {
+        data[0x8010] == 0xB2 && data[0x8011] == 0xA1
+    }
+
+    private var isUserRStickCalibrationDataAvailable: Bool {
+        data[0x801B] == 0xB2 && data[0x801C] == 0xA1
+    }
+
     /// - Parameters:
     ///   - spiFlashMemoryData: data from a memory dump (can be created using dumpSpiFlash.py).
     ///   - size: size of the memory dump, should be constant
@@ -37,16 +47,14 @@ class FlashMemory {
     }
 
     func getUserLStickCalibration() -> Bytes? {
-        // check if calibration data is available {
-        if data[0x8010] == 0xB2, data[0x8011] == 0xA1 {
+        if isUserLStickCalibrationDataAvailable {
             return Array(data[0x8012 ... 0x801A])
         }
         return nil
     }
 
     func getUserRStickCalibration() -> Bytes? {
-        // check if calibration data is available {
-        if data[0x801B] == 0xB2, data[0x801C] == 0xA1 {
+        if isUserRStickCalibrationDataAvailable {
             return Array(data[0x801D ... 0x8025])
         }
         return nil

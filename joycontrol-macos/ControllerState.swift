@@ -217,7 +217,6 @@ struct ControllerState {
     let buttonState: ButtonState
     let leftStickState: StickState
     let rightStickState: StickState
-    let sendCompleteSemaphore = DispatchSemaphore(value: 0)
     init(spiFlash: FlashMemory) {
         self.spiFlash = spiFlash
 

@@ -17,11 +17,10 @@ protocol ControllerProtocolDelgate: AnyObject {
 class ControllerProtocol {
     private let logger = Logger()
     let spiFlash: FlashMemory
-    let readyToAcceptInput: DispatchSemaphore
+    let readyToAcceptInput = DispatchSemaphore(value: 0)
     private let transport: IOBluetoothL2CAPChannel
-    private var inputReportTimer: Byte
+    private var inputReportTimer: Byte = 0x00
     private var inputReportMode: InputReportId?
-    private let dataReceived: DispatchSemaphore
     var controllerState: ControllerState
     private var inputReportModeTimer: Timer?
     var hostAddress: BluetoothAddress
@@ -33,16 +32,6 @@ class ControllerProtocol {
         transport: IOBluetoothL2CAPChannel
     ) {
         self.spiFlash = spiFlash
-
-        inputReportTimer = 0x00
-
-        dataReceived = DispatchSemaphore(value: 0)
-
-        // nil = Just answer to sub commands
-        inputReportMode = nil
-        inputReportModeTimer = nil
-
-        readyToAcceptInput = DispatchSemaphore(value: 0)
         self.hostAddress = hostAddress
         self.delegate = delegate
         self.transport = transport
@@ -60,16 +49,7 @@ class ControllerProtocol {
         }
     }
 
-    /// Waits for the controller state to be sent.
-    /// - Throws: ApplicationError.general if the connection was lost.
-    func sendControllerState() {
-        logger.debug(#function)
-        controllerState.sendCompleteSemaphore.wait() // wait for a send to complete
-    }
-
     /// Sets timer byte and current button state in the input report and sends it.
-    /// Fires sigIsSend event in the controller state afterwards.
-    /// - Throws: ationError.general if the connection was lost.
     private func write(_ inputReport: InputReport) {
         logger.debug(#function)
 
@@ -78,13 +58,10 @@ class ControllerProtocol {
             return
         }
 
-        // set button and stick data of input report
         inputReport.setButtonStatus(controllerState.buttonState.bytes())
         let leftStick = controllerState.leftStickState.bytes()
         let rightStick = controllerState.rightStickState.bytes()
         inputReport.setStickStatus(leftStick, rightStick)
-
-        // set timer byte of input report
         inputReport.setTimer(inputReportTimer)
         let newTimerValue = UInt16(inputReportTimer) + UInt16(1)
         inputReportTimer = Byte(newTimerValue > Byte.max ? 0 : newTimerValue)
@@ -94,8 +71,6 @@ class ControllerProtocol {
         guard result == kIOReturnSuccess else {
             fatalError("Failed to write to transport. IOResult: \(result)")
         }
-
-        controllerState.sendCompleteSemaphore.signal()
     }
 
     func connectionLost() {
@@ -108,12 +83,12 @@ class ControllerProtocol {
     private func inputReportModeFull() {
         logger.debug(#function)
         if inputReportModeTimer != nil {
-            logger.info("already in input report mode")
+            logger.error("already in input report mode")
             return
         }
         var lastSent = Date()
         // send state at 66Hz
-        let sendDelay = 0.015 // 0.015 This appears too slow
+        let sendDelay = 0.015
         DispatchQueue.main.async {
             self.inputReportModeTimer = Timer.scheduledTimer(withTimeInterval: sendDelay, repeats: true) { _ in
                 if Date().timeIntervalSince(lastSent).isLess(than: sendDelay) {
@@ -130,25 +105,23 @@ class ControllerProtocol {
 
     func reportReceived(_ data: Bytes) {
         logger.debug(#function)
-        dataReceived.signal()
 
         let report = try! OutputReport(data)
         let outputReportId = report.getOutputReportId()
         if outputReportId == .subCommand {
             replyToSubCommand(report)
         } else {
-            logger.info("Output report \(String(describing: outputReportId)) not implemented - ignoring")
+            logger.debug("Output report \(String(describing: outputReportId)) not implemented - ignoring")
         }
     }
 
     private func replyToSubCommand(_ report: OutputReport) {
-        // classify sub command
         let subCommand = report.getSubCommand()
         if subCommand == .none {
             logger.error("Received output report does not contain a sub command")
             return
         }
-        logger.info("received output report - Sub command \(String(describing: subCommand))")
+        logger.debug("received output report - Sub command \(String(describing: subCommand))")
 
         let subCommandData = report.getSubCommandData()!
 
@@ -177,18 +150,18 @@ class ControllerProtocol {
         let requestedInputReportMode = InputReportId(rawValue: subCommandData[0])!
         if inputReportMode == requestedInputReportMode {
             let debugDesc = String(describing: requestedInputReportMode)
-            logger.info("Already in input report mode \(debugDesc) - ignoring request")
+            logger.error("Already in input report mode \(debugDesc) - ignoring request")
         }
-        // Start input report reader
+
         if requestedInputReportMode == .imu {
             inputReportModeFull()
         } else {
             let debugDesc = String(describing: requestedInputReportMode)
-            logger.info("input report mode \(debugDesc) not implemented - ignoring request")
+            logger.debug("input report mode \(debugDesc) not implemented - ignoring request")
             return
         }
 
-        logger.info("Setting input report mode to \(String(describing: requestedInputReportMode))...")
+        logger.debug("Setting input report mode to \(String(describing: requestedInputReportMode))...")
         inputReportMode = requestedInputReportMode
     }
 

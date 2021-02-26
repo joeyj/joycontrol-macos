@@ -54,7 +54,7 @@ class ButtonState {
 
             if pushed != Utils.getBit(tempByte, bit) {
                 let newValue = Utils.flipBit(tempByte, bit)
-                logger.info("Updating value for byte \(byte) with \(newValue)")
+                logger.debug("Updating value for byte \(byte) with \(newValue)")
                 buttonStates[byte] = newValue
             }
         }
@@ -96,37 +96,29 @@ class ButtonState {
     deinit {}
 }
 
-/// Set given buttons in the controller state to the pressed down state and wait till send.
+/// Set given buttons in the controller state to the pressed down state.
 func buttonPress(_ buttonState: ButtonState, _ controllerProtocol: ControllerProtocol, _ buttons: [ControllerButton]) throws {
     if buttons.isEmpty {
         throw ApplicationError.general("No Buttons were given.")
     }
 
     for button in buttons {
-        // push button
         buttonState.setButton(button, pushed: true)
     }
-
-    // wait until report is send
-    controllerProtocol.sendControllerState()
 }
 
-/// Set given buttons in the controller state to the unpressed state and wait till send.
+/// Set given buttons in the controller state to the unpressed state.
 func buttonRelease(_ buttonState: ButtonState, _ controllerProtocol: ControllerProtocol, _ buttons: [ControllerButton]) throws {
     if buttons.isEmpty {
         throw ApplicationError.general("No Buttons were given.")
     }
 
     for button in buttons {
-        // release button
         buttonState.setButton(button, pushed: false)
     }
-
-    // wait until report is send
-    controllerProtocol.sendControllerState()
 }
 
-/// Shortly push the given buttons. Wait until the controller state is sent.
+/// Shortly push the given buttons.
 /// - Parameters:
 ///   - sec: Seconds to wait before releasing the button, default: 0.1
 func buttonPush(_ buttonState: ButtonState, _ controllerProtocol: ControllerProtocol, _ buttons: [ControllerButton], sec: Double = 0.1) {
