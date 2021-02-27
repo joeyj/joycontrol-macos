@@ -146,7 +146,7 @@ class StickState {
             && calibration.vCenter - radius <= vStick && vStick <= calibration.vCenter + radius
     }
 
-    func setPosition(_ direction: StickDirection, _ force: Double = 1) {
+    func setPosition(_ direction: StickDirection, durationInMs: Double, force: Double = 1) {
         switch direction {
         case .center:
             setCenter()
@@ -179,6 +179,9 @@ class StickState {
             setHMin(force: force)
             setVMax(force: force)
         }
+
+        Thread.sleep(until: Date() + (durationInMs / 1_000))
+        setCenter()
     }
 
     func setUp(force: Double = 1) {

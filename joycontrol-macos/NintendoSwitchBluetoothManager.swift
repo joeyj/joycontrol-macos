@@ -32,6 +32,10 @@ class NintendoSwitchBluetoothManager: NSObject, IOBluetoothL2CAPChannelDelegate,
     private var connected: Bool = false
     @objc @Published var readyForInput: Bool = false
 
+    var isScanEnabled: Bool {
+        Self.hostController.isScanEnable()
+    }
+
     override private init() {
         super.init()
         Self.hostController.delegate = self
@@ -43,10 +47,6 @@ class NintendoSwitchBluetoothManager: NSObject, IOBluetoothL2CAPChannelDelegate,
             scanEnable: enabled ? .inquiryAndPageScan
                 : .noScans
         )
-    }
-
-    func getIsScanEnabled() -> Bool {
-        Self.hostController.isScanEnable()
     }
 
     func controllerProtocolConnectionLost() {
@@ -85,37 +85,26 @@ class NintendoSwitchBluetoothManager: NSObject, IOBluetoothL2CAPChannelDelegate,
 
     func connectNintendoSwitch(_ address: String) {
         logger.debug(#function)
-        guard nintendoSwitch == nil else {
-            logger.error("Nintendo Switch is already connected. Skipping.")
-            return
-        }
-        DispatchQueue.main.async { [self] in
+        if nintendoSwitch == nil, !address.isEmpty {
             nintendoSwitch = IOBluetoothDevice(addressString: address)!
-            nintendoSwitch!.openConnection()
-            nintendoSwitch!.openL2CAPChannelOrFail(NintendoSwitchBluetoothManager.controlPsm, &controlChannelOutgoing, delegate: self)
-            nintendoSwitch!.openL2CAPChannelOrFail(NintendoSwitchBluetoothManager.interruptPsm, &interruptChannelOutgoing, delegate: self)
         }
+        if nintendoSwitch?.isConnected() == true {
+            logger.debug("Nintendo Switch is already connected. Disconnecting first.")
+            disconnectNintendoSwitch()
+        }
+        nintendoSwitch!.openConnection()
+        nintendoSwitch!.openL2CAPChannelOrFail(NintendoSwitchBluetoothManager.controlPsm, &controlChannelOutgoing, delegate: self)
+        nintendoSwitch!.openL2CAPChannelOrFail(NintendoSwitchBluetoothManager.interruptPsm, &interruptChannelOutgoing, delegate: self)
     }
 
     func disconnectNintendoSwitch() {
         logger.debug(#function)
         DispatchQueue.main.async { [self] in
+            interruptChannel?.close()
+            controlChannel?.close()
             interruptChannelOutgoing?.close()
             controlChannelOutgoing?.close()
             nintendoSwitch?.closeConnection()
-        }
-    }
-
-    func controlStickPushed(_ button: ControllerButton, _ direction: StickDirection) {
-        switch button {
-        case .leftStick:
-            controllerProtocol?.controllerState.leftStickState.setPosition(direction)
-
-        case .rightStick:
-            controllerProtocol?.controllerState.rightStickState.setPosition(direction)
-
-        default:
-            fatalError("Only \(ControllerButton.leftStick) and \(ControllerButton.rightStick) are supported.")
         }
     }
 
@@ -191,14 +180,41 @@ class NintendoSwitchBluetoothManager: NSObject, IOBluetoothL2CAPChannelDelegate,
         }
     }
 
-    func controllerButtonPushed(buttons: [ControllerButton]) {
+    func controlStickPushed(_ button: ControllerButton, _ direction: StickDirection, durationInMs: Double = 100) {
+        switch button {
+        case .leftStick:
+            controllerProtocol?.controllerState.leftStickState.setPosition(direction, durationInMs: durationInMs)
+
+        case .rightStick:
+            controllerProtocol?.controllerState.rightStickState.setPosition(direction, durationInMs: durationInMs)
+
+        default:
+            fatalError("Only \(ControllerButton.leftStick) and \(ControllerButton.rightStick) are supported.")
+        }
+    }
+
+    func controllerButtonPushed(buttons: [ControllerButton], durationInMs: Double = 100) {
         guard controllerProtocol != nil else {
             logger.error("controllerProtocol not initialized")
             return
         }
         logger.debug(#function)
         logger.debug("\(String(describing: buttons))")
-        buttonPush(controllerProtocol!.controllerState.buttonState, controllerProtocol!, buttons)
+        buttonPush(controllerProtocol!.controllerState.buttonState, controllerProtocol!, buttons, sec: durationInMs / 1_000)
+    }
+
+    func performQuickAction(quickAction: ControllerQuickAction) {
+        logger.info("Perforing Quick Action: \(quickAction.name)...")
+        DispatchQueue.global(qos: .background).async { [self] in
+            for step in quickAction.steps {
+                if !step.buttons.isEmpty {
+                    controllerButtonPushed(buttons: step.buttons, durationInMs: Double(step.durationInMs))
+                }
+                if step.stickAndDirection != nil {
+                    controlStickPushed(step.stickAndDirection!.0, step.stickAndDirection!.1, durationInMs: Double(step.durationInMs))
+                }
+            }
+        }
     }
 
     deinit {

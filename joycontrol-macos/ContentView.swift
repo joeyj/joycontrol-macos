@@ -45,6 +45,7 @@ private let kControllerButtonToText: [ControllerButton: String] = [
 struct ContentView: View {
     let logger = Logger()
     @State var toggleAllowPairing: Bool
+    var quickActions: [ControllerQuickActionTopLevel]
     @AppStorage("deviceAddress") private var deviceAddress: String = ""
     @ObservedObject var bluetoothManager = NintendoSwitchBluetoothManager.shared
     var body: some View {
@@ -73,24 +74,42 @@ struct ContentView: View {
                 }
             }.disabled(!bluetoothManager.readyForInput)
             VStack {
-                Toggle("Allow Pairing", isOn: $toggleAllowPairing)
-                    .onChange(of: toggleAllowPairing) { value in
-                        setAllowPairing(value)
+                VStack {
+                    Toggle("Allow Pairing", isOn: $toggleAllowPairing)
+                        .onChange(of: toggleAllowPairing) { value in
+                            setAllowPairing(value)
+                        }
+                    Text("Nintendo Switch Device Address:")
+                    TextField("Nintendo Switch Device Address", text: $deviceAddress)
+                        .disabled(bluetoothManager.readyForInput)
+                        .frame(width: 170, height: 22, alignment: .center)
+                    HStack {
+                        Button("Connect") {
+                            bluetoothManager.connectNintendoSwitch($deviceAddress.wrappedValue)
+                        }.disabled(bluetoothManager.readyForInput)
+                        Button("Disconnect") {
+                            bluetoothManager.disconnectNintendoSwitch()
+                        }.disabled(!bluetoothManager.readyForInput)
                     }
-                Text("Nintendo Switch Device Address:")
-                TextField("Nintendo Switch Device Address", text: $deviceAddress)
-                    .disabled(bluetoothManager.readyForInput)
-                    .frame(width: 170, height: 22, alignment: .center)
-                HStack {
-                    Button("Connect") {
-                        bluetoothManager.connectNintendoSwitch($deviceAddress.wrappedValue)
-                    }.disabled(bluetoothManager.readyForInput)
-                    Button("Disconnect") {
-                        bluetoothManager.disconnectNintendoSwitch()
-                    }.disabled(!bluetoothManager.readyForInput)
+                }.padding(.vertical)
+                VStack {
+                    Text("Quick Actions")
+                        .font(.title2)
+                    ForEach(quickActions) { item in
+                        Text(item.name)
+                            .font(.title3)
+                            .padding(.top)
+                        ForEach(item.children) { child in
+                            Button(child.name) {
+                                bluetoothManager.performQuickAction(quickAction: child)
+                            }
+                        }
+                    }
+                    .disabled(!bluetoothManager.readyForInput)
                 }
-            }
-            .padding(.horizontal)
+                Spacer()
+            }.frame(width: 300)
+                .padding(.horizontal)
             VStack { controllerButton(.zr)
                 controllerButton(.r)
                 HStack(alignment: .center) {
@@ -120,7 +139,7 @@ struct ContentView: View {
                 deviceAddress = output.deviceAddress
             }
         })
-        .frame(width: 500, height: 460)
+        .frame(width: 700, height: 460)
     }
 
     @ViewBuilder
@@ -187,6 +206,6 @@ struct ContentView: View {
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
-        ContentView(toggleAllowPairing: false)
+        ContentView(toggleAllowPairing: false, quickActions: kQuickActions)
     }
 }

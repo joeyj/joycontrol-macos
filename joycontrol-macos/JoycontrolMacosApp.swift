@@ -11,7 +11,7 @@ import SwiftUI
 struct JoycontrolMacosApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView(toggleAllowPairing: NintendoSwitchBluetoothManager.shared.getIsScanEnabled())
+            ContentView(toggleAllowPairing: NintendoSwitchBluetoothManager.shared.isScanEnabled, quickActions: kQuickActions)
         }
     }
 }

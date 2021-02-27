@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		F70A82ED25DB4F4B00E63A8A /* NintendoSwitchBluetoothManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F70A82EC25DB4F4B00E63A8A /* NintendoSwitchBluetoothManager.swift */; };
+		F713EDD325E88555009A08C3 /* ControllerQuickAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = F713EDD225E88555009A08C3 /* ControllerQuickAction.swift */; };
 		F738726225D3A2C200279B82 /* JoycontrolMacosApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F738726125D3A2C200279B82 /* JoycontrolMacosApp.swift */; };
 		F738726625D3A2C300279B82 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F738726525D3A2C300279B82 /* Assets.xcassets */; };
 		F738726925D3A2C300279B82 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F738726825D3A2C300279B82 /* Preview Assets.xcassets */; };
@@ -48,6 +49,7 @@
 
 /* Begin PBXFileReference section */
 		F70A82EC25DB4F4B00E63A8A /* NintendoSwitchBluetoothManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NintendoSwitchBluetoothManager.swift; sourceTree = "<group>"; };
+		F713EDD225E88555009A08C3 /* ControllerQuickAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ControllerQuickAction.swift; sourceTree = "<group>"; };
 		F71B106725D4E761008BD7E2 /* IOKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOKit.framework; path = System/Library/Frameworks/IOKit.framework; sourceTree = SDKROOT; };
 		F71B106F25D5CACB008BD7E2 /* A */ = {isa = PBXFileReference; lastKnownFileType = folder; name = A; path = ../../../../System/Library/Frameworks/IOBluetooth.framework/Versions/A; sourceTree = "<group>"; };
 		F738725E25D3A2C200279B82 /* joycontrol-macos.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "joycontrol-macos.app"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -155,6 +157,7 @@
 				F73872C125D3A3CB00279B82 /* OutputReport.swift */,
 				F738726725D3A2C300279B82 /* Preview Content */,
 				F73872BD25D3A3CB00279B82 /* Utils.swift */,
+				F713EDD225E88555009A08C3 /* ControllerQuickAction.swift */,
 			);
 			path = "joycontrol-macos";
 			sourceTree = "<group>";
@@ -356,6 +359,7 @@
 				F73872CA25D3A3CB00279B82 /* OutputReport.swift in Sources */,
 				F73872CD25D3A3CB00279B82 /* ControllerProtocol.swift in Sources */,
 				F73872C825D3A3CB00279B82 /* InputReport.swift in Sources */,
+				F713EDD325E88555009A08C3 /* ControllerQuickAction.swift in Sources */,
 				F73872C725D3A3CB00279B82 /* ContentView.swift in Sources */,
 				F738726225D3A2C200279B82 /* JoycontrolMacosApp.swift in Sources */,
 			);
