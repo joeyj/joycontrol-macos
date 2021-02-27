@@ -17,14 +17,10 @@ class joycontrol_macosTests: XCTestCase {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
     }
 
-    func testFlashMemoryInitsWithoutArgs() throws {
-        XCTAssertNotNil { try! FlashMemory() }
-    }
-
     func testFlashMemoryInitsWithoutArgsUsesFactoryDefaults() throws {
-        let target = try! FlashMemory()
-        XCTAssertEqual(kFactoryLStickCalibration, target.getFactoryLStickCalibration())
-        XCTAssertEqual(kFactoryRStickCalibration, target.getFactoryRStickCalibration())
+        let target = FlashMemory.factoryDefault
+        XCTAssertEqual(kFactoryLStickCalibration, target.leftStickCalibration)
+        XCTAssertEqual(kFactoryRStickCalibration, target.rightStickCalibration)
     }
 
     func testLeftStickCalibrationFromFactoryBytes() throws {

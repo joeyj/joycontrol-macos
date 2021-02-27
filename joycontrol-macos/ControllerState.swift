@@ -212,7 +212,6 @@ class StickState {
 }
 
 struct ControllerState {
-    private let logger = Logger()
     private let spiFlash: FlashMemory
     let buttonState: ButtonState
     let leftStickState: StickState
@@ -222,14 +221,11 @@ struct ControllerState {
 
         buttonState = ButtonState()
 
-        let leftStickCalibrationData = spiFlash.getUserLStickCalibration() ?? spiFlash.getFactoryLStickCalibration()
-
-        let leftStickCalibration = StickCalibration.fromLeftStick(leftStickCalibrationData)
+        let leftStickCalibration = StickCalibration.fromLeftStick(spiFlash.leftStickCalibration)
 
         leftStickState = StickState(calibration: leftStickCalibration)
-        let rightStickCalibrationData = spiFlash.getUserRStickCalibration() ?? spiFlash.getFactoryRStickCalibration()
 
-        let rightStickCalibration = StickCalibration.fromRightStick(rightStickCalibrationData)
+        let rightStickCalibration = StickCalibration.fromRightStick(spiFlash.rightStickCalibration)
 
         rightStickState = StickState(calibration: rightStickCalibration)
     }
