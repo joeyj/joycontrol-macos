@@ -92,8 +92,8 @@ class NintendoSwitchBluetoothManager: NSObject, IOBluetoothL2CAPChannelDelegate,
         DispatchQueue.main.async { [self] in
             nintendoSwitch = IOBluetoothDevice(addressString: address)!
             nintendoSwitch!.openConnection()
-            nintendoSwitch!.openL2CAPChannelOrFail(NintendoSwitchBluetoothManager.controlPsm, &controlChannelOutgoing)
-            nintendoSwitch!.openL2CAPChannelOrFail(NintendoSwitchBluetoothManager.interruptPsm, &interruptChannelOutgoing)
+            nintendoSwitch!.openL2CAPChannelOrFail(NintendoSwitchBluetoothManager.controlPsm, &controlChannelOutgoing, delegate: self)
+            nintendoSwitch!.openL2CAPChannelOrFail(NintendoSwitchBluetoothManager.interruptPsm, &interruptChannelOutgoing, delegate: self)
         }
     }
 

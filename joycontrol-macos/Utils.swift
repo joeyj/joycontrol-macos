@@ -126,8 +126,8 @@ enum Utils {
 }
 
 extension IOBluetoothDevice {
-    func openL2CAPChannelOrFail(_ psm: BluetoothL2CAPPSM, _ channel: AutoreleasingUnsafeMutablePointer<IOBluetoothL2CAPChannel?>!) {
-        let result = openL2CAPChannelSync(channel, withPSM: psm, delegate: self)
+    func openL2CAPChannelOrFail(_ psm: BluetoothL2CAPPSM, _ channel: AutoreleasingUnsafeMutablePointer<IOBluetoothL2CAPChannel?>!, delegate: AnyObject!) {
+        let result = openL2CAPChannelSync(channel, withPSM: psm, delegate: delegate)
         guard result == kIOReturnSuccess else { // if timeout, show dialog instead of fatalError?
             fatalError("Failed to open l2cap channel PSM: \(psm) result: \(result)")
         }
